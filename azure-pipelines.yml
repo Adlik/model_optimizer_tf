@@ -1,0 +1,24 @@
+trigger:
+  - staging
+  - trying
+  - master
+jobs:
+  - job: Tox
+    displayName: Tox
+    strategy:
+        matrix:
+            Linux:
+                vmImage: ubuntu-latest
+            macOS:
+                vmImage: macos-latest
+            Windows:
+                vmImage: windows-latest
+    pool:
+        vmImage: $(vmImage)
+    steps:
+      - task: UsePythonVersion@0
+        displayName: Use latest Python
+      - script: pip install -U tox
+        displayName: Install tox
+      - script: tox
+        displayName: Run tox

@@ -1,0 +1,13 @@
+[run]
+branch = true
+parallel = true
+
+source = example
+         tests
+
+[paths]
+source = src
+         */site-packages
+
+[report]
+fail_under = 100
