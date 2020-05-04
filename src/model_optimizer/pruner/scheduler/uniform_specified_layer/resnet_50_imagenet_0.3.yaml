@@ -1,0 +1,133 @@
+version: 1
+pruners:
+  prune_func1:
+    criterion: l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.1
+    layers_to_be_pruned: [
+      res0_conv2d_0_1,
+      res0_conv2d_0_2,
+      res0_conv2d_0_3,
+      res0_conv2d_0_4,
+      res0_conv2d_1_1,
+      res0_conv2d_1_2,
+      res0_conv2d_1_3,
+      res0_conv2d_2_1,
+      res0_conv2d_2_2,
+      res0_conv2d_2_3
+    ]
+  prune_func2:
+    criterion: l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.1
+    layers_to_be_pruned: [
+      res1_conv2d_0_1,
+      res1_conv2d_0_2,
+      res1_conv2d_0_3,
+      res1_conv2d_0_4,
+      res1_conv2d_1_1,
+      res1_conv2d_1_2,
+      res1_conv2d_1_3,
+      res1_conv2d_2_1,
+      res1_conv2d_2_2,
+      res1_conv2d_2_3,
+      res1_conv2d_3_1,
+      res1_conv2d_3_2,
+      res1_conv2d_3_3
+    ]
+  prune_func3:
+    criterion: l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.1
+    layers_to_be_pruned: [
+      res2_conv2d_0_1,
+      res2_conv2d_0_2,
+      res2_conv2d_0_3,
+      res2_conv2d_0_4,
+      res2_conv2d_1_1,
+      res2_conv2d_1_2,
+      res2_conv2d_1_3,
+      res2_conv2d_2_1,
+      res2_conv2d_2_2,
+      res2_conv2d_2_3,
+      res2_conv2d_3_1,
+      res2_conv2d_3_2,
+      res2_conv2d_3_3,
+      res2_conv2d_4_1,
+      res2_conv2d_4_2,
+      res2_conv2d_4_3,
+      res2_conv2d_5_1,
+      res2_conv2d_5_2,
+      res2_conv2d_5_3
+    ]
+  prune_func4:
+    criterion: l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.1
+    layers_to_be_pruned: [
+            res3_conv2d_0_1,
+            res3_conv2d_0_2,
+            res3_conv2d_0_3,
+            res3_conv2d_0_4,
+            res3_conv2d_1_1,
+            res3_conv2d_1_2,
+            res3_conv2d_1_3,
+            res3_conv2d_2_1,
+            res3_conv2d_2_2,
+            res3_conv2d_2_3
+            ]
+
+
+lr_schedulers:
+  # Learning rate
+  - name: warmup_lr
+    class: LearningRateWarmupCallback
+    warmup_epochs: 5
+    verbose: 0
+  - name: lr_multiply_1
+    class: LearningRateScheduleCallback
+    start_epoch: 5
+    end_epoch: 30
+    multiplier: 1.0
+  - name: lr_multiply_0.1
+    class: LearningRateScheduleCallback
+    start_epoch: 30
+    end_epoch: 90
+    multiplier: 1e-1
+  - name: lr_multiply_0.01
+    class: LearningRateScheduleCallback
+    start_epoch: 90
+    end_epoch: 110
+    multiplier: 1e-2
+  - name: lr_multiply_0.001
+    class: LearningRateScheduleCallback
+    start_epoch: 110
+    multiplier: 1e-3
+
+prune_schedulers:
+  - pruner:
+      func_name: prune_func1
+    epochs: [50]
+
+  - pruner:
+      func_name: prune_func2
+    epochs: [50]
+  - pruner:
+      func_name: prune_func3
+    epochs: [50]
+  - pruner:
+      func_name: prune_func4
+    epochs: [50]
+
+  - pruner:
+      func_name: prune_func1
+    epochs: [60]
+  - pruner:
+      func_name: prune_func2
+    epochs: [60]
+  - pruner:
+      func_name: prune_func3
+    epochs: [60]
+  - pruner:
+      func_name: prune_func4
+    epochs: [60]

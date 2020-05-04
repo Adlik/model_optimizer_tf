@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "properties": {
+    "dataset": {
+      "type": "string",
+      "enum": [
+        "mnist",
+        "cifar10",
+        "imagenet"
+      ],
+      "description": "dataset name"
+    },
+    "model_name": {
+      "type": "string",
+      "description": "model name"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "version number of output model"
+    },
+    "data_dir": {
+      "type": "string",
+      "description": "file path of dataset"
+    },
+    "checkpoint_path": {
+      "type": "string",
+      "description": "file path of checkpoint"
+    },
+    "checkpoint_eval_path": {
+      "type": "string",
+      "description": "file path of eval checkpoint"
+    }
+  },
+  "required": [
+    "dataset",
+    "model_name"
+  ],
+  "additionalProperties": true
+}
