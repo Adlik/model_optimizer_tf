@@ -13,14 +13,14 @@ def get_model(config, is_training=True):
     :return: class of keras Model
     """
     model_name = config.get_attribute('model_name')
-    if model_name not in ['lenet', 'resnet_18', 'lenet_bn', 'resnet_50']:
+    if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50']:
         raise Exception('Not support dataset %s' % model_name)
     if model_name == 'lenet':
         from .lenet import lenet
         return lenet(is_training)
-    elif model_name == 'lenet_bn':
-        from .lenet_bn import lenet_bn
-        return lenet_bn(is_training)
+    elif model_name == 'vgg_m_16':
+        from .vgg import vgg_m_16
+        return vgg_m_16(is_training)
     elif model_name == 'resnet_18':
         from .resnet import resnet_18
         return resnet_18(is_training)

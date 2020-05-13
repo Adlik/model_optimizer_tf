@@ -46,5 +46,3 @@ class MnistDataset(DatasetBase):
         label = tf.cast(features['label'], dtype=tf.int32)
         return tf.reshape(image, [28, 28, 1]), label
 
-
-
