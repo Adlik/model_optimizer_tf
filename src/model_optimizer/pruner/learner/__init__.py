@@ -20,5 +20,9 @@ def get_learner(config):
     elif model_name == 'resnet_50' and dataset_name == 'imagenet':
         from .resnet_50_imagenet import Learner
         return Learner(config)
+    elif model_name == 'vgg_m_16' and dataset_name == 'cifar10':
+        from .vgg_m_16_cifar10 import Learner
+        return Learner(config)
     else:
         raise Exception('Not support learner: {}_{}'.format(model_name, dataset_name))
+

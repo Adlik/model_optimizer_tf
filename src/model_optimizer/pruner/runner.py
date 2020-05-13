@@ -10,8 +10,9 @@ def _prune(config, epoch, learner):
     prune_list = get_pruner(config, epoch)
     learner.print_model_summary()
     for pruner in prune_list:
-        model = learner.get_latest_train_model()
-        new_model = pruner.prune(model)
+        orig_model = learner.get_original_train_model()
+        cur_model = learner.get_latest_train_model()
+        new_model = pruner.prune(orig_model, cur_model)
         learner.train_models_update(new_model)
         learner.print_model_summary()
 

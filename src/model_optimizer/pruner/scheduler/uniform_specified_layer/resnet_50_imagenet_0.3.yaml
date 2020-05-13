@@ -3,80 +3,25 @@ pruners:
   prune_func1:
     criterion: l1_norm
     prune_type: specified_layer_prune
-    ratio: 0.1
+    ratio: 0.05
     layers_to_be_pruned: [
-      res0_conv2d_0_1,
-      res0_conv2d_0_2,
-      res0_conv2d_0_3,
-      res0_conv2d_0_4,
-      res0_conv2d_1_1,
-      res0_conv2d_1_2,
-      res0_conv2d_1_3,
-      res0_conv2d_2_1,
-      res0_conv2d_2_2,
-      res0_conv2d_2_3
-    ]
-  prune_func2:
-    criterion: l1_norm
-    prune_type: specified_layer_prune
-    ratio: 0.1
-    layers_to_be_pruned: [
-      res1_conv2d_0_1,
-      res1_conv2d_0_2,
-      res1_conv2d_0_3,
-      res1_conv2d_0_4,
-      res1_conv2d_1_1,
-      res1_conv2d_1_2,
-      res1_conv2d_1_3,
-      res1_conv2d_2_1,
-      res1_conv2d_2_2,
-      res1_conv2d_2_3,
-      res1_conv2d_3_1,
-      res1_conv2d_3_2,
-      res1_conv2d_3_3
-    ]
-  prune_func3:
-    criterion: l1_norm
-    prune_type: specified_layer_prune
-    ratio: 0.1
-    layers_to_be_pruned: [
-      res2_conv2d_0_1,
-      res2_conv2d_0_2,
-      res2_conv2d_0_3,
-      res2_conv2d_0_4,
-      res2_conv2d_1_1,
-      res2_conv2d_1_2,
-      res2_conv2d_1_3,
-      res2_conv2d_2_1,
-      res2_conv2d_2_2,
-      res2_conv2d_2_3,
-      res2_conv2d_3_1,
-      res2_conv2d_3_2,
-      res2_conv2d_3_3,
-      res2_conv2d_4_1,
-      res2_conv2d_4_2,
-      res2_conv2d_4_3,
-      res2_conv2d_5_1,
-      res2_conv2d_5_2,
-      res2_conv2d_5_3
-    ]
-  prune_func4:
-    criterion: l1_norm
-    prune_type: specified_layer_prune
-    ratio: 0.1
-    layers_to_be_pruned: [
-            res3_conv2d_0_1,
-            res3_conv2d_0_2,
-            res3_conv2d_0_3,
-            res3_conv2d_0_4,
-            res3_conv2d_1_1,
+            res1_conv2d_1_2,
+            res1_conv2d_2_2,
+            res1_conv2d_3_2,
+            res2_conv2d_1_2,
+            res2_conv2d_2_2,
+            res2_conv2d_3_2,
+            res2_conv2d_4_2,
             res3_conv2d_1_2,
-            res3_conv2d_1_3,
-            res3_conv2d_2_1,
             res3_conv2d_2_2,
-            res3_conv2d_2_3
+            res3_conv2d_3_2,
+            res3_conv2d_4_2,
+            res3_conv2d_5_2,
+            res3_conv2d_6_2,
+            res4_conv2d_1_2,
+            res4_conv2d_2_2,
+            res4_conv2d_3_2,
             ]
-
 
 lr_schedulers:
   # Learning rate
@@ -107,27 +52,5 @@ lr_schedulers:
 prune_schedulers:
   - pruner:
       func_name: prune_func1
-    epochs: [50]
+    epochs: [52,54,56,58,60,62,64,66,68,70]
 
-  - pruner:
-      func_name: prune_func2
-    epochs: [50]
-  - pruner:
-      func_name: prune_func3
-    epochs: [50]
-  - pruner:
-      func_name: prune_func4
-    epochs: [50]
-
-  - pruner:
-      func_name: prune_func1
-    epochs: [60]
-  - pruner:
-      func_name: prune_func2
-    epochs: [60]
-  - pruner:
-      func_name: prune_func3
-    epochs: [60]
-  - pruner:
-      func_name: prune_func4
-    epochs: [60]

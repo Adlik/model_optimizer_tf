@@ -29,7 +29,6 @@ class MnistDataset(DatasetBase):
         self.buffer_size = 10000
         self.num_samples_of_train = 60000
         self.num_samples_of_val = 10000
-        # self.parse_fn = lambda x: parse_fn(x)
 
     def parse_fn(self, example_serialized):
         """

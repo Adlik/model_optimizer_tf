@@ -74,6 +74,5 @@ class ImagenetDataset(DatasetBase):
             output_width=224,
             num_channels=3,
             is_training=self.is_training)
-        # label = tf.cast(tf.reshape(label, shape=[1]), dtype=tf.int32) - 1
         return image, label
 

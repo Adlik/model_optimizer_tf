@@ -39,8 +39,8 @@ def resnet(layer_num, num_classes=1001, use_l2_regularizer=True, is_training=Tru
     x = tf.keras.layers.MaxPooling2D(pool_size=3, strides=2, padding='same')(x)
     num_stacked_blocks = 4
     num_filters = 64
-    for stage in range(num_stacked_blocks):
-        for block in range(stack_block_nums[stage]):
+    for stage in range(1, num_stacked_blocks+1):
+        for block in range(1, stack_block_nums[stage-1]+1):
             if layer_num < 50:
                 x = residual_block(stage, block, x, num_filters, 3, is_training)
             else:
@@ -92,7 +92,7 @@ def residual_block(stage, block_num, input_data, filters, kernel_size, is_traini
 
 
 def bottleneck_block(stage, block_num, input_data, filters, kernel_size, is_training, use_l2_regularizer=True):
-    if stage != 0 and block_num == 0:
+    if stage != 1 and block_num == 1:
         strides = 2
     else:
         strides = 1
@@ -116,7 +116,7 @@ def bottleneck_block(stage, block_num, input_data, filters, kernel_size, is_trai
                                name='res'+str(stage)+'_conv2d_'+str(block_num)+'_3')(x)
     x = tf.keras.layers.BatchNormalization(momentum=0.9, epsilon=1e-5,
                                            name='res'+str(stage)+'_bn_'+str(block_num)+'_3')(x, training=is_training)
-    if block_num == 0:
+    if block_num == 1:
         input_data = tf.keras.layers.Conv2D(filters*4, kernel_size=1, strides=strides, use_bias=False,
                                             kernel_initializer='he_normal',
                                             kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
@@ -127,7 +127,4 @@ def bottleneck_block(stage, block_num, input_data, filters, kernel_size, is_trai
     x = tf.keras.layers.Add(name='res'+str(stage)+'_add_'+str(block_num)+'_1')([x, input_data])
     x = tf.keras.layers.Activation('relu', name='res'+str(stage)+'_act_'+str(block_num))(x)
     return x
-
-
-
 

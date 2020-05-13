@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import tensorflow as tf
+import numpy as np
 
 
 def get_keras_model_flops(model_h5_path):
@@ -26,3 +27,42 @@ def print_keras_model_summary(model, hvd_rank):
     model.summary(print_fn=lambda x: string_list.append(x))
     short_model_summary = "\n".join(string_list)
     print(short_model_summary)
+
+
+def print_keras_model_params_flops(model, hvd_rank):
+    if hvd_rank != 0:
+        return
+    total_params, total_flops = _count_model_params_flops(model)
+    print(f'total params: {str(total_params)}')
+    print(f'total flops: {str(total_flops)}')
+
+
+def _count_conv_layer_flops(conv_layer):
+    out_shape = conv_layer.output.shape.as_list()
+    n_cells_total = np.prod(out_shape[1:-1])
+    n_conv_params_total = conv_layer.count_params()
+    conv_flops = n_conv_params_total * n_cells_total
+    return conv_flops
+
+
+def _count_dense_layer_flops(dense_layer):
+    out_shape = dense_layer.output.shape.as_list()
+    in_shape = dense_layer.input.shape.as_list()
+    dense_flops = np.prod([out_shape[-1], in_shape[-1]])
+    return dense_flops
+
+
+def _count_model_params_flops(model):
+    total_params = 0
+    total_flops = 0
+    for layer in model.layers:
+        total_params += layer.count_params()
+        if any(conv_type in str(type(layer)) for conv_type in ['Conv1D', 'Conv2D', 'Conv3D']):
+            flops = _count_conv_layer_flops(layer)
+            total_flops += flops
+        elif 'Dense' in str(type(layer)):
+            flops = _count_dense_layer_flops(layer)
+            total_flops += flops
+        else:
+            print(f'warning:: skippring layer: {str(layer)}')
+    return total_params, total_flops

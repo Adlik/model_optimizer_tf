@@ -9,10 +9,11 @@ from .pruner import AutoPruner
 from .pruner import SpecifiedLayersPruner
 
 
-def get_pruner(config, cur_epoch):
+def get_pruner(config, epoch):
     """
-    Get pruner list
+    Get pruner list according epoch
     :param config: Config object
+    :param epoch: epoch
     :return: pruner list
     """
     scheduler_config = get_scheduler(config)
@@ -22,9 +23,10 @@ def get_pruner(config, cur_epoch):
         'specified_layer_prune': SpecifiedLayersPruner
     }
     for scheduler in scheduler_config['prune_schedulers']:
-        if cur_epoch in scheduler['epochs']:
+        if epoch in scheduler['epochs']:
             func_name = scheduler['pruner']['func_name']
             pruner_type = scheduler_config['pruners'][func_name]['prune_type']
             if pruner_type in pruners:
                 pruner_list.append(pruners[pruner_type](scheduler_config['pruners'][func_name]))
     return pruner_list
+

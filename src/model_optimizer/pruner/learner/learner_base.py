@@ -8,7 +8,7 @@ import abc
 import os
 import horovod.tensorflow.keras as hvd
 from .utils import get_call_backs
-from ...stat import print_keras_model_summary
+from ...stat import print_keras_model_summary, print_keras_model_params_flops
 
 
 class LearnerBase(metaclass=abc.ABCMeta):
@@ -34,8 +34,12 @@ class LearnerBase(metaclass=abc.ABCMeta):
         if gpus:
             tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'GPU')
         self.verbose = 1 if hvd.rank() == 0 else 0
-        train_model = get_model(config, is_training=True)
-        eval_model = get_model(config, is_training=False)
+        origin_train_model = get_model(config, is_training=True)
+        origin_eval_model = get_model(config, is_training=False)
+        self.models_train.append(origin_train_model)
+        self.models_eval.append(origin_eval_model)
+        train_model = tf.keras.models.clone_model(origin_train_model)
+        eval_model = tf.keras.models.clone_model(origin_eval_model)
         self.models_train.append(train_model)
         self.models_eval.append(eval_model)
         self.train_dataset, self.val_dataset = self.build_dataset()
@@ -121,6 +125,12 @@ class LearnerBase(metaclass=abc.ABCMeta):
     def get_latest_eval_model(self):
         return self.models_eval[-1]
 
+    def get_original_train_model(self):
+        return self.models_train[0]
+
+    def get_original_eval_model(self):
+        return self.models_eval[0]
+
     def train_models_update(self, new_model):
         old_model = self.models_train.pop()
         del old_model
@@ -139,17 +149,12 @@ class LearnerBase(metaclass=abc.ABCMeta):
                 break
         if self.resume_from_epoch > 0:
             self.cur_epoch = self.resume_from_epoch
-            # Horovod: broadcast resume_from_epoch from rank 0 (which will have
-            # checkpoints) to other ranks.
-            # self.resume_from_epoch = hvd.broadcast(self.resume_from_epoch, 0, name='resume_from_epoch')
-            # self.cur_epoch = hvd.broadcast(self.cur_epoch, 0, name='cur_epoch')
             model = tf.keras.models.load_model(
                 os.path.join(self.checkpoint_path,
                              self.checkpoint_format.format(epoch=self.resume_from_epoch)))
             self.train_models_update(model)
 
     def save_eval_model(self):
-
         if hvd.rank() != 0:
             return
         train_model = self.models_train[-1]
@@ -169,3 +174,8 @@ class LearnerBase(metaclass=abc.ABCMeta):
     def print_model_summary(self):
         train_model = self.models_train[-1]
         print_keras_model_summary(train_model, hvd.rank())
+
+    def print_model_params_flops(self):
+        train_model = self.models_train[-1]
+        print_keras_model_params_flops(train_model, hvd.rank())
+
