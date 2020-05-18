@@ -8,7 +8,7 @@ Model optimizer.
 """
 
 from setuptools import find_packages, setup
-
+from pkg_resources import DistributionNotFound, get_distribution
 _VERSION = '0.0.0'
 
 _REQUIRED_PACKAGES = [
@@ -27,6 +27,17 @@ _TEST_REQUIRES = [
     'pytest-xdist'
 ]
 
+
+def get_dist(pkgname):
+    try:
+        return get_distribution(pkgname)
+    except DistributionNotFound:
+        return None
+
+
+if get_dist('tensorflow') is None and get_dist('tensorflow-gpu') is not None:
+    _REQUIRED_PACKAGES.remove('tensorflow==2.1.0')
+
 setup(
     name="model_optimizer",
     version=_VERSION.replace('-', ''),
@@ -40,7 +51,9 @@ setup(
     install_requires=_REQUIRED_PACKAGES,
     extras_require={'test': _TEST_REQUIRES},
     package_data={
-        'model_optimizer': ['*.json']
+        'model_optimizer': ['**/*.json',
+                            'pruner/scheduler/uniform_auto/*.yaml',
+                            'pruner/scheduler/uniform_specified_layer/*.yaml']
     },
 
 )

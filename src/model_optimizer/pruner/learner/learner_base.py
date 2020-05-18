@@ -22,7 +22,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         self.models_train = []
         self.models_eval = []
         self.train_steps_per_epoch = 1
-        self.val_steps_per_epoch = 1
+        self.eval_steps_per_epoch = 1
         self.resume_from_epoch = 0
         self.verbose = 1
         self.cur_epoch = 0
@@ -42,11 +42,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
         eval_model = tf.keras.models.clone_model(origin_eval_model)
         self.models_train.append(train_model)
         self.models_eval.append(eval_model)
-        self.train_dataset, self.val_dataset = self.build_dataset()
+        self.train_dataset, self.eval_dataset = self.build_dataset()
         self.build_train()
         self.build_eval()
         self.load_model()
-
         self.save_model_path = config.get_attribute('checkpoint_eval_path')
         self.callbacks = []
 
@@ -72,11 +71,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
         self.train_steps_per_epoch = ds_train.steps_per_epoch
         self.train_steps_per_epoch = self.train_steps_per_epoch // hvd.size()
         train_dataset = ds_train.build()
-        ds_val = get_dataset(self.config, is_training=False)
-        self.val_steps_per_epoch = ds_val.steps_per_epoch
-        val_dataset = ds_val.build()
-        print('train_steps_per_epoch: {}'.format(self.train_steps_per_epoch))
-        return train_dataset, val_dataset
+        ds_eval = get_dataset(self.config, is_training=False)
+        self.eval_steps_per_epoch = ds_eval.steps_per_epoch
+        eval_dataset = ds_eval.build()
+        return train_dataset, eval_dataset
 
     def build_train(self):
         loss = self.get_losses()
@@ -115,7 +113,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         if hvd.rank() != 0:
             return
         eval_model = self.models_eval[-1]
-        score = eval_model.evaluate(self.val_dataset, steps=self.val_steps_per_epoch)
+        score = eval_model.evaluate(self.eval_dataset, steps=self.eval_steps_per_epoch)
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
 

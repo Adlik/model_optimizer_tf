@@ -50,8 +50,8 @@ $ git clone https://github.com/Adlik/model_optimizer.git
 ```
 ### 2.2 Install the package
 ```shell
-$ pip install tensorflow-gpu==2.0.0
-$ pip install horovod==0.19.0
+$ pip install tensorflow-gpu==2.1.0
+$ pip install horovod==0.19.1
 $ pip install networkx
 $ pip install jsonschema
 

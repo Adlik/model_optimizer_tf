@@ -67,7 +67,6 @@ def _get_layer_mask(model, layer_id, layer_type, digraph, num_retain_channels, c
             next_id = idx
         if digraph.nodes[next_id]['type'].endswith('BatchNormalization\'>'):
             bn_layer = model.layers[next_id]
-            print(f'layer.name: {layer.name}, bn_layer.name: {bn_layer.name}')
             gamma = bn_layer.weights[0].numpy()
             return _get_sorted_mask(gamma, num_retain_channels)
         else:
