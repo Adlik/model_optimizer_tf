@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-dataset input function
+Dataset input function
 """
 
 
@@ -26,4 +26,3 @@ def input_fn(dataset_name, data_path):
         return ImagenetDataset(data_path).input_gen
     else:
         raise Exception('Not support dataset {}'.format(dataset_name))
-

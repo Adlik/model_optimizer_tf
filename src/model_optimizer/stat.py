@@ -1,11 +1,19 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Params and FLOPs
+"""
 import tensorflow as tf
 import numpy as np
 
 
 def get_keras_model_flops(model_h5_path):
+    """
+    Get keras model FLOPs
+    :param model_h5_path: keras model path
+    :return: FLOPs
+    """
     session = tf.compat.v1.Session()
     graph = tf.compat.v1.get_default_graph()
 
@@ -21,15 +29,24 @@ def get_keras_model_flops(model_h5_path):
 
 
 def print_keras_model_summary(model, hvd_rank):
+    """
+    Print keras model summary
+    :param model: keras model
+    :param hvd_rank: horovod rank
+    :return:
+    """
     if hvd_rank != 0:
         return
-    string_list = []
-    model.summary(print_fn=lambda x: string_list.append(x))
-    short_model_summary = "\n".join(string_list)
-    print(short_model_summary)
+    print(model.summary())
 
 
 def print_keras_model_params_flops(model, hvd_rank):
+    """
+    Print keras model paras and FLOPs
+    :param model: keras model
+    :param hvd_rank: horovod rank
+    :return:
+    """
     if hvd_rank != 0:
         return
     total_params, total_flops = _count_model_params_flops(model)

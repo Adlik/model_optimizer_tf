@@ -1,6 +1,10 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Provides utilities to preprocess images
+"""
+
 import tensorflow as tf
 
 _RESIZE_MIN = 256
@@ -8,6 +12,18 @@ _RESIZE_MIN = 256
 
 def preprocess_image(image_buffer, bbox, output_height, output_width,
                      num_channels=3, is_training=False):
+    """
+    Image process
+    :param image_buffer: image
+    :param bbox: 3-D float Tensor of bounding boxes arranged [1, num_boxes, coords]
+      where each coordinate is [0, 1) and the coordinates are arranged as
+      [ymin, xmin, ymax, xmax].
+    :param output_height: output height
+    :param output_width: output width
+    :param num_channels: num of channels
+    :param is_training: if training or not
+    :return: image
+    """
     if is_training:
         bbox_begin, bbox_size, _ = tf.image.sample_distorted_bounding_box(
             tf.image.extract_jpeg_shape(image_buffer),

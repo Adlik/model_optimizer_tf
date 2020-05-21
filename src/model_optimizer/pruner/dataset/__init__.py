@@ -2,16 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-dataset
+Dataset
 """
 
 
-def get_dataset(config, is_training, shard=[1, 0]):
+def get_dataset(config, is_training, num_shards=1, shard_index=0):
     """
     Get dataset
     :param config: Config object
     :param is_training: get training dataset or val dataset
-    :param shard: get subset of dataset with index shard[1], dataset split into shard[0] part
+    :param num_shards: dataset split into shard[0] part
+    :param shard_index: get subset of dataset with index shard_index,
     :return: class of Dataset
     """
     dataset_name = config.get_attribute('dataset')
@@ -25,6 +26,6 @@ def get_dataset(config, is_training, shard=[1, 0]):
         return Cifar10Dataset(config, is_training)
     elif dataset_name == 'imagenet':
         from .imagenet import ImagenetDataset
-        return ImagenetDataset(config, is_training, shard)
+        return ImagenetDataset(config, is_training, num_shards, shard_index)
     else:
         raise Exception('Not support dataset {}'.format(dataset_name))

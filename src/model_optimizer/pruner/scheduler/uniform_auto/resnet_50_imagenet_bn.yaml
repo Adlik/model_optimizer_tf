@@ -1,8 +1,8 @@
 version: 1
 pruners:
   prune_func1:
-    criterion: l1_norm
-    prune_type: bn_gamma
+    criterion: bn_gamma
+    prune_type: auto_prune
     ratio: 0.1
 
 lr_schedulers:

@@ -1,13 +1,18 @@
+# Copyright 2019 ZTE corporation. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+"""
+Cifar10 dataset.
+"""
+import os
 import tensorflow as tf
 from .dataset_base import DatasetBase
-import os
 
 
 class Cifar10Dataset(DatasetBase):
     """
     Cifar10 dataset.
     """
-
     def __init__(self, config, is_training):
         """
         Constructor function.
@@ -47,4 +52,3 @@ class Cifar10Dataset(DatasetBase):
             image = tf.image.random_crop(image, [32, 32, 3])
             image = tf.image.random_flip_left_right(image)
         return image, label
-

@@ -1,8 +1,11 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Test acc for resnet_50 TF-Lite model
+"""
 import os
-from common.model_predict import tflite_model_predict
+from common.model_predict import tflite_model_predict  # pylint: disable=import-error,no-name-in-module
 
 
 if __name__ == "__main__":

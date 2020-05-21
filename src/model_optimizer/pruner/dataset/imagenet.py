@@ -1,9 +1,12 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Imagenet dataset.
+"""
+import os
 import tensorflow as tf
 from .dataset_base import DatasetBase
-import os
 from ...utils.imagenet_preprocessing import preprocess_image
 
 
@@ -11,15 +14,14 @@ class ImagenetDataset(DatasetBase):
     """
     Imagenet dataset.
     """
-
-    def __init__(self, config, is_training, shard):
+    def __init__(self, config, is_training, num_shards=1, shard_index=0):
         """
         Constructor function.
         :param config: Config object
         :param is_training: whether to construct the training subset
         :return:
         """
-        super(ImagenetDataset, self).__init__(config, is_training, shard)
+        super(ImagenetDataset, self).__init__(config, is_training, num_shards, shard_index)
         if is_training:
             self.file_pattern = os.path.join(self.data_dir, 'train-*-of-*')
             self.batch_size = self.batch_size
@@ -75,4 +77,3 @@ class ImagenetDataset(DatasetBase):
             num_channels=3,
             is_training=self.is_training)
         return image, label
-

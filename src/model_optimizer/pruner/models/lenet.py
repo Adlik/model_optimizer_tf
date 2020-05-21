@@ -1,6 +1,9 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Lenet model
+"""
 import tensorflow as tf
 
 
@@ -30,4 +33,3 @@ def lenet(is_training=True):
     output_ = tf.keras.layers.Dense(10, activation='softmax', name='dense_3')(x)
     model = tf.keras.Model(input_, output_)
     return model
-

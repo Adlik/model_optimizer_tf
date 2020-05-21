@@ -1,8 +1,13 @@
-import tensorflow as tf
-import os
-from ..quantizer_base import BaseQuantizer
+# Copyright 2019 ZTE corporation. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
-from model_optimizer.log_util import get_logger
+"""
+TF-Lite quantizer
+"""
+import os
+import tensorflow as tf
+from ..quantizer_base import BaseQuantizer
+from ...log_util import get_logger
 
 _LOGGER = get_logger(__name__)
 
@@ -43,7 +48,8 @@ class Quantizer(BaseQuantizer):
             version_file.write(tf.__version__)
         _LOGGER.info('Write TFVERSION file success, path: %s', version_path)
 
-    def get_platform(self):
+    @staticmethod
+    def get_platform():
         """
         Get platform
         :return:

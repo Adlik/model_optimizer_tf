@@ -1,6 +1,9 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Imagenet dataset.
+"""
 import tensorflow as tf
 from .dataset_base import DatasetBase
 from ...utils.imagenet_preprocessing import preprocess_image
@@ -19,10 +22,8 @@ class ImagenetDataset(DatasetBase):
         """
         super(ImagenetDataset, self).__init__(data_path)
         self.dataset_fn = tf.data.TFRecordDataset
-        self.buffer_size = 10000
-        self.num_samples_of_train = 1281167
-        self.num_samples_of_val = 50000
 
+    # pylint: disable=R0201
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data
@@ -66,6 +67,4 @@ class ImagenetDataset(DatasetBase):
             output_width=224,
             num_channels=3,
             is_training=True)
-        # label = tf.cast(tf.reshape(label, shape=[1]), dtype=tf.int32) - 1
         return image, label
-

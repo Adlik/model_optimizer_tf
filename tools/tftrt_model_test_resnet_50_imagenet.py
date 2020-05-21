@@ -1,8 +1,11 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Test acc for resnet-50 TF-TRT model
+"""
 import os
-from common.model_predict import tftrt_model_predict
+from common.model_predict import tftrt_model_predict  # pylint: disable=import-error,no-name-in-module
 
 if __name__ == "__main__":
     base_dir = os.path.dirname(__file__)
@@ -18,5 +21,3 @@ if __name__ == "__main__":
     }
 
     tftrt_model_predict(request, saved_model_dir)
-
-

@@ -52,5 +52,5 @@ lr_schedulers:
 prune_schedulers:
   - pruner:
       func_name: prune_func1
-    epochs: [52,54,56,58,60,62,64,66]
+    epochs: [50,52,54,56,58,60,62,64]
 

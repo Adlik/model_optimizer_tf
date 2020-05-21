@@ -1,3 +1,8 @@
+# Copyright 2019 ZTE corporation. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+"""
+Quantize or prune model
+"""
 
 from .quantizer import create_quantizer
 from .quantizer.config import create_config_from_obj as quant_conf_from_obj
@@ -26,4 +31,3 @@ def prune_model(request):
     """
 
     return run_scheduler(prune_conf_from_obj(request))
-

@@ -1,16 +1,20 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Train a VGG_M_16 model on cifar10 dataset
+"""
 import os
-import sys
+# If you did not execute the setup.py, uncomment the following four lines
+# import sys
+# from os.path import abspath, join, dirname
+# sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
+# print(sys.path)
 
-# If you have executed the setup.py, comment out the following three lines
-from os.path import abspath, join, dirname
-sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
-print(sys.path)
+from model_optimizer import prune_model  # noqa: E402
 
-from model_optimizer import prune_model # noqa: E402
-if __name__ == "__main__":
+
+def _main():
     base_dir = os.path.dirname(__file__)
     request = {
         "dataset": "cifar10",
@@ -27,3 +31,6 @@ if __name__ == "__main__":
     }
     prune_model(request)
 
+
+if __name__ == "__main__":
+    _main()

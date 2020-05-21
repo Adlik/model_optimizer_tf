@@ -1,17 +1,30 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import yaml
+"""
+Scheduler utility
+"""
 import os
+import yaml
 
 
 def get_config(path):
+    """
+    Get config from a path
+    :param path: file path
+    :return:
+    """
     with open(path) as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
+        config = yaml.safe_load(file)
     return config
 
 
 def config_get_epochs_to_train(config):
+    """
+    Get epochs from Config object
+    :param config: Config object
+    :return:
+    """
     scheduler_config = get_scheduler(config)
     if scheduler_config is None:
         return 0, [], None
@@ -19,9 +32,14 @@ def config_get_epochs_to_train(config):
 
 
 def get_epochs_lr_to_train(scheduler_config):
+    """
+    Get epochs from scheduler dict
+    :param scheduler_config: scheduler dict
+    :return:
+    """
     epochs = set()
-    for s in scheduler_config['prune_schedulers']:
-        epochs.update(s['epochs'])
+    for item in scheduler_config['prune_schedulers']:
+        epochs.update(item['epochs'])
     global_epochs = sorted(epochs)
     start_epoch = 0
     epochs_span = []
@@ -37,6 +55,11 @@ def get_epochs_lr_to_train(scheduler_config):
 
 
 def get_scheduler(config):
+    """
+    Get scheduler dict from config
+    :param config: Config object
+    :return:
+    """
     base_dir = os.path.dirname(__file__)
     dataset = config.get_attribute('dataset')
     model = config.get_attribute('model_name')
@@ -48,6 +71,3 @@ def get_scheduler(config):
         return get_config(os.path.join(base_dir, scheduler, file_name))
     else:
         return get_config(os.path.join(base_dir, scheduler, model+'_'+dataset+'.yaml'))
-
-
-

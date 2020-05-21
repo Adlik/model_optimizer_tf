@@ -1,9 +1,15 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Test acc for resnet_50 TF-Lite model multi process
+
+ $ mpirun --allow-run-as-root -np 64 -H localhost:64 python tflite_model_test_resnet_50_imagenet_mp.py
+"""
 import os
-from common.model_predict import tflite_model_predict
 from mpi4py import MPI
+from common.model_predict import tflite_model_predict  # pylint: disable=import-error,no-name-in-module
+
 
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -22,5 +28,3 @@ if __name__ == "__main__":
         base_dir,
         '../examples/models_eval_ckpt/resnet_50_imagenet_quantized/resnet_50/1/resnet_50.tflite')
     tflite_model_predict(request, tflite_file_path, mpi_size, mpi_rank, comm)
-
-

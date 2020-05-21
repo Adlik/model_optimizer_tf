@@ -1,6 +1,9 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Pruner class define and function related
+"""
 import networkx as nx
 import tensorflow as tf
 import numpy as np
@@ -12,19 +15,19 @@ def get_network(model):
     :param model: keras functional Model
     :return: networkx's DiGraph
     """
-    g = nx.DiGraph()
+    digraph = nx.DiGraph()
     for i, layer in enumerate(model.layers):
-        g.add_node(i, name=layer.name, type=str(type(layer)))
+        digraph.add_node(i, name=layer.name, type=str(type(layer)))
     for i, layer in enumerate(model.layers):
         for j in range(0, len(model.layers)):
             _inputs = model.layers[j].input
             if isinstance(_inputs, list):
                 for _input in _inputs:
                     if layer.output.name == _input.name:
-                        g.add_edge(i, j, name=layer.input.name)
+                        digraph.add_edge(i, j, name=layer.input.name)
             elif layer.output.name == _inputs.name:
-                g.add_edge(i, j, name=layer.output.name)
-    return g
+                digraph.add_edge(i, j, name=layer.output.name)
+    return digraph
 
 
 def _get_sorted_mask(arr, num_retain_channels):
@@ -60,7 +63,7 @@ def _get_layer_mask(model, layer_id, layer_type, digraph, num_retain_channels, c
             l1_norm = np.sum(np.abs(kernel), axis=(0, 1, 2))
         else:
             l1_norm = np.sum(np.abs(kernel), axis=(0,))
-        return _get_sorted_mask(l1_norm, num_retain_channels)
+        arr = l1_norm
     elif criterion == 'bn_gamma':
         next_ids = digraph.successors(layer_id)
         for idx in next_ids:
@@ -68,14 +71,15 @@ def _get_layer_mask(model, layer_id, layer_type, digraph, num_retain_channels, c
         if digraph.nodes[next_id]['type'].endswith('BatchNormalization\'>'):
             bn_layer = model.layers[next_id]
             gamma = bn_layer.weights[0].numpy()
-            return _get_sorted_mask(gamma, num_retain_channels)
+            arr = gamma
         else:
             kernel = layer.weights[0].numpy()
             if layer_type == 'conv':
                 l1_norm = np.sum(np.abs(kernel), axis=(0, 1, 2))
             else:
                 l1_norm = np.sum(np.abs(kernel), axis=(0,))
-            return _get_sorted_mask(l1_norm, num_retain_channels)
+            arr = l1_norm
+    return _get_sorted_mask(arr, num_retain_channels)
 
 
 def get_relate_father_id(layer_id, digraph):
@@ -102,12 +106,47 @@ def get_relate_father_id(layer_id, digraph):
     if len(node_list) >= 1:
         new_id = node_list[0]
         if digraph.nodes[new_id]['type'].split(sep='.')[-1][:-2] in skip_op:
-            relate_id, _ = get_relate_father_id(new_id, digraph)
+            relate_id = get_relate_father_id(new_id, digraph)
         elif digraph.nodes[new_id]['type'].endswith('Conv2D\'>') or digraph.nodes[new_id]['type'].endswith('Dense\'>'):
             relate_id = new_id
         else:
             relate_id = -1
-    return relate_id, digraph
+    return relate_id
+
+
+def _bn_layer_set_weights(pruned_model, layer, idx, mask_father_id, mask_dict):
+    if mask_father_id in mask_dict:
+        weights_gamma = layer.weights[0].numpy()[mask_dict[mask_father_id]]
+        weights_beta = layer.weights[1].numpy()[mask_dict[mask_father_id]]
+        weights_moving_mean = layer.weights[2].numpy()[mask_dict[mask_father_id]]
+        weights_moving_variance = layer.weights[3].numpy()[mask_dict[mask_father_id]]
+        pruned_model.layers[idx].set_weights([weights_gamma, weights_beta, weights_moving_mean,
+                                              weights_moving_variance])
+    else:
+        pruned_model.layers[idx].set_weights(layer.get_weights())
+
+
+def _layer_set_weights(pruned_model, layer, weights_0, idx, mask_dict):
+    layer_type = str(type(layer))
+    if idx in mask_dict:
+        if layer_type.endswith('Conv2D\'>'):
+            if layer.use_bias:
+                pruned_model.layers[idx].set_weights([weights_0[:, :, :, mask_dict[idx]],
+                                                      layer.weights[1].numpy()[mask_dict[idx]]])
+            else:
+                pruned_model.layers[idx].set_weights([weights_0[:, :, :, mask_dict[idx]]])
+        else:
+            if layer.use_bias:
+                pruned_model.layers[idx].set_weights([weights_0[:, mask_dict[idx]],
+                                                      layer.weights[1].numpy()[mask_dict[idx]]])
+            else:
+                pruned_model.layers[idx].set_weights(
+                    [weights_0[:, mask_dict[idx]]])
+    else:
+        if layer.use_bias:
+            pruned_model.layers[idx].set_weights([weights_0, layer.get_weights()[1]])
+        else:
+            pruned_model.layers[idx].set_weights([weights_0])
 
 
 def update_weights(model, pruned_model, digraph, mask_dict):
@@ -115,7 +154,7 @@ def update_weights(model, pruned_model, digraph, mask_dict):
     Update all weights with pruned mask dict
     :param model: model before pruned
     :param pruned_model: model after pruned
-    :param digraph: networx DiGraph
+    :param digraph: networkx's DiGraph
     :param mask_dict: mask dict which save all mask for all layers to be pruned
     :return:
     """
@@ -127,17 +166,9 @@ def update_weights(model, pruned_model, digraph, mask_dict):
             model_layer_input_shape = layer.input.shape
             mask_father_id = -1
             if new_model_layer_input_shape != model_layer_input_shape:
-                mask_father_id, _ = get_relate_father_id(i, digraph)
+                mask_father_id = get_relate_father_id(i, digraph)
             if layer_type.endswith('BatchNormalization\'>'):
-                if mask_father_id in mask_dict:
-                    weights_gamma = layer.weights[0].numpy()[mask_dict[mask_father_id]]
-                    weights_beta = layer.weights[1].numpy()[mask_dict[mask_father_id]]
-                    weights_moving_mean = layer.weights[2].numpy()[mask_dict[mask_father_id]]
-                    weights_moving_variance = layer.weights[3].numpy()[mask_dict[mask_father_id]]
-                    pruned_model.layers[i].set_weights([weights_gamma, weights_beta, weights_moving_mean,
-                                                        weights_moving_variance])
-                else:
-                    pruned_model.layers[i].set_weights(layer.get_weights())
+                _bn_layer_set_weights(pruned_model, layer, i, mask_father_id, mask_dict)
                 continue
             if mask_father_id != -1 and mask_father_id in mask_dict:
                 weights_0 = layer.weights[0].numpy().reshape(
@@ -151,25 +182,7 @@ def update_weights(model, pruned_model, digraph, mask_dict):
                     weights_0 = weights_0.reshape(-1, weights_0.shape[-1])
             else:
                 weights_0 = layer.weights[0].numpy()
-            if i in mask_dict:
-                if layer_type.endswith('Conv2D\'>'):
-                    if layer.use_bias:
-                        pruned_model.layers[i].set_weights([weights_0[:, :, :, mask_dict[i]],
-                                                            layer.weights[1].numpy()[mask_dict[i]]])
-                    else:
-                        pruned_model.layers[i].set_weights([weights_0[:, :, :, mask_dict[i]]])
-                else:
-                    if layer.use_bias:
-                        pruned_model.layers[i].set_weights(
-                            [weights_0[:, mask_dict[i]], layer.weights[1].numpy()[mask_dict[i]]])
-                    else:
-                        pruned_model.layers[i].set_weights(
-                            [weights_0[:, mask_dict[i]]])
-            else:
-                if layer.use_bias:
-                    pruned_model.layers[i].set_weights([weights_0, layer.get_weights()[1]])
-                else:
-                    pruned_model.layers[i].set_weights([weights_0])
+            _layer_set_weights(pruned_model, layer, weights_0, i, mask_dict)
 
 
 def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion='l1_norm'):
@@ -190,7 +203,7 @@ def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion=
             if layer.name in layers_name:
                 clone_model.layers[i].filters = \
                     clone_model.layers[i].filters - int(orig_model.layers[i].filters * ratio)
-                mask_dict[i] = _get_conv_mask(clone_model, i, digraph, int(clone_model.layers[i].filters), criterion)
+                mask_dict[i] = _get_conv_mask(cur_model, i, digraph, int(clone_model.layers[i].filters), criterion)
         elif 'Dense' in str(type(layer)):
             if i == len(cur_model.layers) - 1:
                 continue
@@ -198,7 +211,7 @@ def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion=
                 if layer.name in layers_name:
                     clone_model.layers[i].units = \
                         clone_model.layers[i].units - int(orig_model.layers[i].units * ratio)
-                    mask_dict[i] = _get_dense_mask(clone_model, i, digraph, int(clone_model.layers[i].units), criterion)
+                    mask_dict[i] = _get_dense_mask(cur_model, i, digraph, int(clone_model.layers[i].units), criterion)
     pruned_model = tf.keras.models.model_from_json(clone_model.to_json())
     update_weights(cur_model, pruned_model, digraph, mask_dict)
     return pruned_model
@@ -220,20 +233,20 @@ def auto_prune(orig_model, cur_model, ratio, criterion='l1_norm'):
         if 'Conv2D' in str(type(layer)):
             clone_model.layers[i].filters = \
                 clone_model.layers[i].filters - int(orig_model.layers[i].filters * ratio)
-            mask_dict[i] = _get_conv_mask(clone_model, i, digraph, int(clone_model.layers[i].filters), criterion)
+            mask_dict[i] = _get_conv_mask(cur_model, i, digraph, int(clone_model.layers[i].filters), criterion)
         elif 'Dense' in str(type(layer)):
             if i == len(cur_model.layers) - 1:
                 continue
             else:
                 clone_model.layers[i].units = \
                     clone_model.layers[i].units - int(orig_model.layers[i].units * ratio)
-                mask_dict[i] = _get_dense_mask(clone_model, i, digraph, int(clone_model.layers[i].units), criterion)
+                mask_dict[i] = _get_dense_mask(cur_model, i, digraph, int(clone_model.layers[i].units), criterion)
     pruned_model = tf.keras.models.model_from_json(clone_model.to_json())
     update_weights(cur_model, pruned_model, digraph, mask_dict)
     return pruned_model
 
 
-class AutoPruner(object):
+class AutoPruner:
     """
     Auto select layers to prune.
     """
@@ -243,10 +256,16 @@ class AutoPruner(object):
         self.criterion = config['criterion']
 
     def prune(self, orig_model, cur_model):
+        """
+        Auto prune layer with fixed ratio
+        :param orig_model: original model, never pruned once
+        :param cur_model: model before this step of pruned
+        :return: pruned model
+        """
         return auto_prune(orig_model, cur_model, self.ratio, self.criterion)
 
 
-class SpecifiedLayersPruner(object):
+class SpecifiedLayersPruner:
     """
     Specified layers to prune.
     """
@@ -257,4 +276,10 @@ class SpecifiedLayersPruner(object):
         self.layers_name = config['layers_to_be_pruned']
 
     def prune(self, orig_model, cur_model):
+        """
+        Prune with specified layers
+        :param orig_model: original model, never pruned once
+        :param cur_model: model before this step of pruned
+        :return: pruned model
+        """
         return specified_layers_prune(orig_model, cur_model, self.layers_name, self.ratio, self.criterion)

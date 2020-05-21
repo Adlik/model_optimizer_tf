@@ -1,10 +1,12 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+_Config Object
+"""
 import os
-import jsonschema
 import json
-
+import jsonschema
 from ..log_util import get_logger
 
 _LOGGER = get_logger(__name__)

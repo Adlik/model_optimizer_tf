@@ -2,7 +2,7 @@
 branch = true
 parallel = true
 
-source = example
+source = model_optimizer
          tests
 
 [paths]
@@ -10,4 +10,5 @@ source = src
          */site-packages
 
 [report]
-fail_under = 100
+fail_under = 10
+

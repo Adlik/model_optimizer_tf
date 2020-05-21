@@ -1,14 +1,19 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from .learner_base import LearnerBase
-import tensorflow as tf
+"""
+Resnet-50 on imagenet Learner definition
+"""
 import os
-from tensorflow.python.keras.optimizer_v2 import gradient_descent as gradient_descent_v2
+import tensorflow as tf
 import horovod.tensorflow.keras as hvd
+from .learner_base import LearnerBase
 
 
 class Learner(LearnerBase):
+    """
+    Resnet-50 on imagenet Learner
+    """
     def __init__(self, config):
         super(Learner, self).__init__(config)
         self.callbacks = [
@@ -38,12 +43,24 @@ class Learner(LearnerBase):
                                                                      period=self.checkpoint_save_period))
 
     def get_optimizer(self):
-        opt = gradient_descent_v2.SGD(learning_rate=self.learning_rate*hvd.size(), momentum=0.9)
+        """
+        Model compile optimizer
+        :return: Return model compile optimizer
+        """
+        opt = tf.keras.optimizers.SGD(learning_rate=self.learning_rate*hvd.size(), momentum=0.9)
         opt = hvd.DistributedOptimizer(opt)
         return opt
 
     def get_losses(self):
+        """
+        Model compile losses
+        :return: Return model compile losses
+        """
         return 'sparse_categorical_crossentropy'
 
     def get_metrics(self):
-            return ['sparse_categorical_accuracy']
+        """
+        Model compile metrics
+        :return: Return model compile metrics
+        """
+        return ['sparse_categorical_accuracy']

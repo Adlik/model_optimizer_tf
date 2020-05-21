@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-dataset base class
+Dataset base class
 """
 
 import tensorflow as tf
@@ -20,6 +20,10 @@ class DatasetBase:
         _LOGGER.info('data_dir is: %s', self.data_path)
 
     def input_gen(self):
+        """
+        Generate input
+        :return: image iter
+        """
         dataset = self.__build()
         for image, _ in dataset:
             yield [image]
@@ -31,5 +35,3 @@ class DatasetBase:
         dataset = dataset.batch(1)
         dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
         return dataset
-
-

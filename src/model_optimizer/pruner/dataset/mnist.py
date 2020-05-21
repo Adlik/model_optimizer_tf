@@ -1,16 +1,18 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Mnist dataset
+"""
+import os
 import tensorflow as tf
 from .dataset_base import DatasetBase
-import os
 
 
 class MnistDataset(DatasetBase):
     """
-    mnist dataset
+    Mnist dataset
     """
-
     def __init__(self, config, is_training):
         """
         Constructor function.
@@ -30,6 +32,7 @@ class MnistDataset(DatasetBase):
         self.num_samples_of_train = 60000
         self.num_samples_of_val = 10000
 
+    # pylint: disable=R0201
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data
@@ -45,4 +48,3 @@ class MnistDataset(DatasetBase):
         image = tf.cast(image, dtype='float32') / 255.0
         label = tf.cast(features['label'], dtype=tf.int32)
         return tf.reshape(image, [28, 28, 1]), label
-

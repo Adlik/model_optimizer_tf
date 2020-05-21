@@ -1,10 +1,18 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Learner callbacks utility
+"""
 import horovod.tensorflow.keras as hvd
 
 
 def get_call_backs(lr_schedulers):
+    """
+    Build learner callbacks from schedulers
+    :param lr_schedulers: schedulers dict
+    :return: callbacks list
+    """
     callbacks = [
         # Horovod: broadcast initial variable states from rank 0 to all other processes.
         # This is necessary to ensure consistent initialization of all workers when
@@ -28,4 +36,3 @@ def get_call_backs(lr_schedulers):
                                                                         end_epoch=end_epoch,
                                                                         multiplier=float(lr_func['multiplier'])))
     return callbacks
-

@@ -1,8 +1,11 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Keras model of lenet predict
+"""
 import os
-from common.model_predict import keras_model_predict
+from common.model_predict import keras_model_predict  # pylint: disable=import-error,no-name-in-module
 
 
 if __name__ == "__main__":

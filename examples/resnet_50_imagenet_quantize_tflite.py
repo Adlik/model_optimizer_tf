@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-This is a mnist sample which compile keras h5 model to tf serving/openvino/tensorrt model.
+This is a imagenet sample which compile keras h5 model to tf serving/openvino/tensorrt model.
 The request of compiling model must match config_schema.json
 """
 import os
-import sys
+# If you did not execute the setup.py, uncomment the following four lines
+# import sys
+# from os.path import abspath, join, dirname
+# sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
+# print(sys.path)
 
-# If you have executed the setup.py, comment out the following three lines
-from os.path import abspath, join, dirname
-sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
-print(sys.path)
 from model_optimizer import quantize_model  # noqa: E402
 from model_optimizer.quantizer.calib_dataset import input_fn  # noqa: E402
 

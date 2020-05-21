@@ -1,8 +1,15 @@
-import tensorflow as tf
+# Copyright 2019 ZTE corporation. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+"""
+TF-TRT quantizer
+"""
 import os
-from tensorflow.python.compiler.tensorrt import trt_convert as trt
+import tensorflow as tf
+from tensorflow.python.compiler.tensorrt import trt_convert as trt  # pylint: disable=import-error,no-name-in-module
 from ..quantizer_base import BaseQuantizer
-from model_optimizer.log_util import get_logger
+from ...log_util import get_logger
+
 _LOGGER = get_logger(__name__)
 
 
@@ -46,7 +53,8 @@ class Quantizer(BaseQuantizer):
             version_file.write(tf.__version__)
         _LOGGER.info('Write TFVERSION file success, path: %s', version_path)
 
-    def get_platform(self):
+    @staticmethod
+    def get_platform():
         """
         Get platform
         :return:

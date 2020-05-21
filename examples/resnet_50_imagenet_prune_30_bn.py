@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-This is a resnet_50 prune sample with filter select by l1_norm.
+This is a imagenet prune sample with filter select by bn_gamma.
 """
 import os
 # If you did not execute the setup.py, uncomment the following four lines
@@ -27,7 +27,8 @@ def _main():
         "checkpoint_path": os.path.join(base_dir, "./models_ckpt/resnet_50_imagenet_pruned"),
         "checkpoint_save_period": 5,  # save a checkpoint every 5 epoch
         "checkpoint_eval_path": os.path.join(base_dir, "./models_eval_ckpt/resnet_50_imagenet_pruned"),
-        "scheduler": "uniform_auto"
+        "scheduler": "uniform_specified_layer",
+        "scheduler_file_name": "resnet_50_imagenet_0.3_bn.yaml"
     }
     prune_model(request)
 

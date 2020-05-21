@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-learner
+Learner
 """
 
 
@@ -25,4 +25,3 @@ def get_learner(config):
         return Learner(config)
     else:
         raise Exception('Not support learner: {}_{}'.format(model_name, dataset_name))
-

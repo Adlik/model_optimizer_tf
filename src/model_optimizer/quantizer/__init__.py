@@ -10,6 +10,7 @@ def create_quantizer(config, calibrate_input_func):
     """
     Get model quantizer
     :param config: Config object
+    :param calibrate_input_func: func to get input
     :return: class of quantizer
     """
     model_type = config.get_attribute('model_type')

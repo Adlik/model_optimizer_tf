@@ -9,7 +9,7 @@ Convert MNIST Dataset to local TFRecords
 import argparse
 import os
 import tensorflow as tf
-from common.convert_to_tfrecord import convert
+from common.convert_to_tfrecord import convert  # pylint: disable=import-error,no-name-in-module
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -1,16 +1,20 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+This is a imagenet prune sample with filter select by l1_norm.
+"""
 import os
-import sys
+# If you did not execute the setup.py, uncomment the following four lines
+# import sys
+# from os.path import abspath, join, dirname
+# sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
+# print(sys.path)
 
-# If you have executed the setup.py, comment out the following three lines
-from os.path import abspath, join, dirname
-sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
-print(sys.path)
+from model_optimizer import prune_model  # noqa: E402
 
-from model_optimizer import prune_model # noqa: E402
-if __name__ == "__main__":
+
+def _main():
     base_dir = os.path.dirname(__file__)
     request = {
         "dataset": "imagenet",  # or imagenet
@@ -24,6 +28,10 @@ if __name__ == "__main__":
         "checkpoint_save_period": 5,  # save a checkpoint every 5 epoch
         "checkpoint_eval_path": os.path.join(base_dir, "./models_eval_ckpt/resnet_50_imagenet_pruned"),
         "scheduler": "uniform_specified_layer",
-        "scheduler_file_name": "resnet_50_imagenet_0.3_bn.yaml"
+        "scheduler_file_name": "resnet_50_imagenet_0.3.yaml"
     }
     prune_model(request)
+
+
+if __name__ == "__main__":
+    _main()

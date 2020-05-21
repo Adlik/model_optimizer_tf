@@ -15,6 +15,8 @@ _REQUIRED_PACKAGES = [
     'requests',
     'tensorflow==2.1.0',
     'jsonschema==3.1.1',
+    'networkx==2.4',
+    'mpi4py==3.0.3',
     'horovod==0.19.1'
 ]
 
@@ -29,6 +31,11 @@ _TEST_REQUIRES = [
 
 
 def get_dist(pkgname):
+    """
+    Get distribution
+    :param pkgname: str, package name
+    :return:
+    """
     try:
         return get_distribution(pkgname)
     except DistributionNotFound:
@@ -57,4 +64,3 @@ setup(
     },
 
 )
-

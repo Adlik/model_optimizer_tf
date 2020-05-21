@@ -8,7 +8,7 @@ Convert Cifar10 Dataset to local TFRecords
 import argparse
 import os
 import tensorflow as tf
-from common.convert_to_tfrecord import convert
+from common.convert_to_tfrecord import convert  # pylint: disable=import-error,no-name-in-module
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -23,4 +23,3 @@ if __name__ == '__main__':
         tf.keras.datasets.cifar10.load_data()
     convert((x_train, y_train), 'train', os.path.expanduser(args.data_dir))
     convert((x_test, y_test), 'test', os.path.expanduser(args.data_dir))
-

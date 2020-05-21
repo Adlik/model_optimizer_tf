@@ -29,4 +29,3 @@ def get_pruner(config, epoch):
             if pruner_type in pruners:
                 pruner_list.append(pruners[pruner_type](scheduler_config['pruners'][func_name]))
     return pruner_list
-

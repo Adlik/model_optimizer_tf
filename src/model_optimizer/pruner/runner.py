@@ -1,6 +1,9 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Run as scheduler config defined
+"""
 from .core import get_pruner
 from .scheduler.common import config_get_epochs_to_train
 from .learner import get_learner
@@ -18,8 +21,13 @@ def _prune(config, epoch, learner):
 
 
 def run_scheduler(config):
+    """
+    Run as scheduler config defined
+    :param config: Config object
+    :return:
+    """
     learner = get_learner(config)
-    global_epochs, epochs_span, lr_schedulers = config_get_epochs_to_train(config)
+    _, epochs_span, lr_schedulers = config_get_epochs_to_train(config)
     cur_epoch = 0
     ln_cur_epoch = learner.cur_epoch
     if ln_cur_epoch > 0 and len(epochs_span) != 0:
@@ -47,4 +55,3 @@ def run_scheduler(config):
         learner.save_eval_model()
         learner.build_eval()
         learner.eval()
-

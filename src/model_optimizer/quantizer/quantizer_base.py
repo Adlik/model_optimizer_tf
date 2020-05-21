@@ -4,11 +4,11 @@
 """
 Model quantizer base class
 """
-from abc import abstractmethod
-from .compressor import compress_dir
+import os
 import shutil
 import uuid
-import os
+from abc import abstractmethod
+from .compressor import compress_dir
 from .message import fail, success
 from ..log_util import get_logger
 _LOGGER = get_logger(__name__)
@@ -71,11 +71,11 @@ class BaseQuantizer:
         """
         Make model dir, the structure of export dir is:
         export_dir
-        └── model_name
-            ├── version_1(version_dir)
-            │   └── tftrt SavedModel or tflite model
-            └── version_2
-                └── tftrt SavedModel or tflite model
+        |--model_name
+            |-- version_1(version_dir)
+            |   |-- tftrt SavedModel or tflite model
+            |-- version_2
+                |-- tftrt SavedModel or tflite model
         :return:
         """
         _LOGGER.info('make_model_dir: export base path: %s', self.export_path)

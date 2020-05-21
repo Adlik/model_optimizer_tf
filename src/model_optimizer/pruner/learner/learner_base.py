@@ -1,17 +1,23 @@
 # Copyright 2019 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import tensorflow as tf
-from ..dataset import get_dataset
-from ..models import get_model
+"""
+LearnerBase class
+"""
 import abc
 import os
+import tensorflow as tf
 import horovod.tensorflow.keras as hvd
+from ..dataset import get_dataset
+from ..models import get_model
 from .utils import get_call_backs
 from ...stat import print_keras_model_summary, print_keras_model_params_flops
 
 
 class LearnerBase(metaclass=abc.ABCMeta):
+    """
+    LearnerBase class
+    """
     def __init__(self, config):
         self.config = config
         self.checkpoint_path = config.get_attribute('checkpoint_path')
@@ -51,23 +57,42 @@ class LearnerBase(metaclass=abc.ABCMeta):
 
     @property
     def resume_epoch(self):
+        """
+        Resume epoch property
+        :return: Return resume epoch
+        """
         return self.resume_from_epoch
 
     @abc.abstractmethod
     def get_losses(self):
+        """
+        Model compile losses
+        :return: Return model compile losses
+        """
         pass
 
     @abc.abstractmethod
     def get_optimizer(self):
+        """
+        Model compile optimizer
+        :return: Return model compile optimizer
+        """
         pass
 
     @abc.abstractmethod
     def get_metrics(self):
+        """
+        Model compile metrics
+        :return: Return model compile metrics
+        """
         pass
 
     def build_dataset(self):
-        shard = [hvd.size(), hvd.rank()]
-        ds_train = get_dataset(self.config, is_training=True, shard=shard)
+        """
+        Dataset for train or evaluate
+        :return: Return dataset for train or eval
+        """
+        ds_train = get_dataset(self.config, is_training=True, num_shards=hvd.size(), shard_index=hvd.rank())
         self.train_steps_per_epoch = ds_train.steps_per_epoch
         self.train_steps_per_epoch = self.train_steps_per_epoch // hvd.size()
         train_dataset = ds_train.build()
@@ -77,6 +102,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
         return train_dataset, eval_dataset
 
     def build_train(self):
+        """
+        Model compile for train model
+        :return:
+        """
         loss = self.get_losses()
         optimizer = self.get_optimizer()
         metrics = self.get_metrics()
@@ -87,6 +116,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
                             experimental_run_tf_function=False)
 
     def build_eval(self):
+        """
+        Model compile for eval model
+        :return:
+        """
         loss = self.get_losses()
         optimizer = self.get_optimizer()
         metrics = self.get_metrics()
@@ -97,6 +130,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
                            experimental_run_tf_function=False)
 
     def train(self, initial_epoch=0, epochs=1, lr_schedulers=None):
+        """
+        Model train process
+        :return:
+        """
         train_model = self.models_train[-1]
         if lr_schedulers is not None:
             self.callbacks.clear()
@@ -110,6 +147,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
         self.cur_epoch += epochs-initial_epoch
 
     def eval(self):
+        """
+        Model eval process, only evaluate on rank 0
+        :return:
+        """
         if hvd.rank() != 0:
             return
         eval_model = self.models_eval[-1]
@@ -118,28 +159,56 @@ class LearnerBase(metaclass=abc.ABCMeta):
         print('Test accuracy:', score[1])
 
     def get_latest_train_model(self):
+        """
+        Get latest train model
+        :return: Return latest train model
+        """
         return self.models_train[-1]
 
     def get_latest_eval_model(self):
+        """
+        Get latest eval model
+        :return: Return latest eval model
+        """
         return self.models_eval[-1]
 
     def get_original_train_model(self):
+        """
+        Get original train model
+        :return: Return original train model
+        """
         return self.models_train[0]
 
     def get_original_eval_model(self):
+        """
+        Get original eval model
+        :return: Return original eval model
+        """
         return self.models_eval[0]
 
     def train_models_update(self, new_model):
+        """
+        Update last train model
+        :return:
+        """
         old_model = self.models_train.pop()
         del old_model
         self.models_train.append(new_model)
 
     def eval_models_update(self, new_model):
+        """
+        Update last eval model
+        :return:
+        """
         old_model = self.models_eval.pop()
         del old_model
         self.models_eval.append(new_model)
 
     def load_model(self):
+        """
+        Load checkpoint and update cur_epoch resume_from_epoch train_model
+        :return:
+        """
         self.resume_from_epoch = 0
         for try_epoch in range(self.epochs, 0, -1):
             if os.path.exists(os.path.join(self.checkpoint_path, self.checkpoint_format.format(epoch=try_epoch))):
@@ -153,6 +222,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
             self.train_models_update(model)
 
     def save_eval_model(self):
+        """
+        Save evaluate model
+        :return:
+        """
         if hvd.rank() != 0:
             return
         train_model = self.models_train[-1]
@@ -170,10 +243,17 @@ class LearnerBase(metaclass=abc.ABCMeta):
         self.eval_models_update(pruned_eval_model)
 
     def print_model_summary(self):
+        """
+        Print model summary
+        :return:
+        """
         train_model = self.models_train[-1]
         print_keras_model_summary(train_model, hvd.rank())
 
     def print_model_params_flops(self):
+        """
+        Print model params and flops
+        :return:
+        """
         train_model = self.models_train[-1]
         print_keras_model_params_flops(train_model, hvd.rank())
-
