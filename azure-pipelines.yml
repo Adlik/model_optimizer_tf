@@ -22,3 +22,13 @@ jobs:
         displayName: Install tox
       - script: tox
         displayName: Run tox
+
+  - job: Markdownlint
+    displayName: Markdownlint
+    pool:
+        vmImage: ubuntu-latest
+    steps:
+      - script: sudo npm install -g markdownlint-cli
+        displayName: Install markdownlint-cli
+      - script: markdownlint '**/*.md'
+        displayName: Run markdownlint
