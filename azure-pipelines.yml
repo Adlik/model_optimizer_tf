@@ -9,15 +9,14 @@ jobs:
         matrix:
             Linux:
                 vmImage: ubuntu-latest
-            macOS:
-                vmImage: macos-latest
-            Windows:
-                vmImage: windows-latest
     pool:
         vmImage: $(vmImage)
     steps:
       - task: UsePythonVersion@0
-        displayName: Use latest Python
+        inputs:
+          versionSpec: '3.6'
+      - script: sudo apt-get install -y --no-install-recommends openmpi-bin libopenmpi-dev
+        displayName: Install openmpi
       - script: pip install -U tox
         displayName: Install tox
       - script: tox

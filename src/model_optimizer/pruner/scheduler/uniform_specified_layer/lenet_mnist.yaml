@@ -1,0 +1,36 @@
+version: 1
+pruners:
+  prune_func1:
+    criterion: l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.1
+    layers_to_be_pruned: [
+      conv2d_2,
+      dense_1,
+      dense_2]
+
+  prune_func2:
+    criterion: l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.1
+    layers_to_be_pruned: [
+      conv2d_2,
+      dense_1,
+      dense_2]
+
+prune_schedulers:
+  - pruner:
+      func_name: prune_func1
+    epochs: [1]
+
+  - pruner:
+      func_name: prune_func2
+    epochs: [2]
+
+  - pruner:
+      func_name: prune_func1
+    epochs: [3]
+
+  - pruner:
+      func_name: prune_func2
+    epochs: [4]
