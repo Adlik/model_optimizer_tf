@@ -22,17 +22,18 @@ three modules.
 After filter pruning, model can continue to be quantized, the following table shows the accuracy of the pruned and
 quantized Lenet-5 and ResNet-50 models.
 
-|   model   | baseline |       pruned       | pruned+quantization(TF-Lite) | pruned+quantization(TF-TRT) |
-| --------- | -------- | ------------------ | ---------------------------- | --------------------------- |
-| LeNet-5   | 98.85    | 99.11(59% pruned)  | 99.05                        | 99.11                       |
-| ResNet-50 | 76.174   | 75.456(31.9% pruned) | 75.158                       | 75.28                      |
+| model     | baseline | pruned               | pruned+quantization(TF-Lite) | pruned+quantization(TF-TRT) |
+| --------- | -------- | -------------------- | ---------------------------- | --------------------------- |
+| LeNet-5   | 98.85    | 99.11(59% pruned)    | 99.05                        | 99.11                       |
+| ResNet-50 | 76.174   | 75.456(31.9% pruned) | 75.158                       | 75.28                       |
 
 The Pruner completely removes redundant parameters, which further leads to smaller model size and faster execution.
 The following table is the size of the above model files:
-|   model   | baseline(H5) |       pruned(H5)       | quantization(TF-Lite) | quantization(TF-TRT) |
-| --------- | -------- | ------------------ | --------------------- | -------------------- |
-| LeNet-5   | 1176KB    |499KB(59% pruned)  | 120KB                 | 1154KB (pb)                |
-| ResNet-50 | 99MB    | 67MB(31.9% pruned) | 18MB                | 138MB(pb)               |
+
+| model     | baseline(H5) | pruned(H5)         | quantization(TF-Lite) | quantization(TF-TRT) |
+| --------- | ------------ | ------------------ | --------------------- | -------------------- |
+| LeNet-5   | 1176KB       | 499KB(59% pruned)  | 120KB                 | 1154KB (pb)          |
+| ResNet-50 | 99MB         | 67MB(31.9% pruned) | 18MB                  | 138MB(pb)            |
 
 ## 1. Pruning and quantization principle
 
@@ -78,7 +79,7 @@ Notes:
 Clone the Adlik model optimizer code repository from github:
 
 ```shell
-     git clone https://github.com/Adlik/model_optimizer.git
+git clone https://github.com/Adlik/model_optimizer.git
 ```
 
 ### 2.2 Install the package
@@ -86,27 +87,26 @@ Clone the Adlik model optimizer code repository from github:
 #### 2.2.1 Install Open MPI
 
 ```shell
-     mkdir /tmp/openmpi && \
-     cd /tmp/openmpi && \
-     curl -fSsL -O https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.0.tar.gz && \
-     tar zxf openmpi-4.0.0.tar.gz && \
-     cd openmpi-4.0.0 && \
-     ./configure --enable-orterun-prefix-by-default && \
-     make -j    (nproc) all && \
-     make install && \
-     ldconfig && \
-     rm -rf /tmp/openmpi
+mkdir /tmp/openmpi && \
+cd /tmp/openmpi && \
+curl -fSsL -O https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.0.tar.gz && \
+tar zxf openmpi-4.0.0.tar.gz && \
+cd openmpi-4.0.0 && \
+./configure --enable-orterun-prefix-by-default && \
+make -j (nproc) all && \
+make install && \
+ldconfig && \
+rm -rf /tmp/openmpi
 ```
 
 #### 2.2.2 Install python package
 
 ```shell
-     pip install tensorflow-gpu==2.1.0
-     pip install horovod==0.19.1
-     pip install mpi4py
-     pip install networkx
-     pip install jsonschema
-
+pip install tensorflow-gpu==2.1.0
+pip install horovod==0.19.1
+pip install mpi4py
+pip install networkx
+pip install jsonschema
 ```
 
 ## 3. Usage
@@ -121,8 +121,8 @@ training, pruning, and quantization.
 Enter the tools directory and execute
 
 ```shell
-     cd tools
-     python export_mnist_to_tfrecord.py
+cd tools
+python export_mnist_to_tfrecord.py
 ```
 
 By default, the train.tfrecords and test.tfrecords files will be generated in the ../examples/data/mnist directory.
@@ -133,8 +133,8 @@ You can change the default storage path with the parameter --data_dir.
 Enter the tools directory and execute
 
 ```shell
-     cd tools
-     python generator_tiny_record_mnist.py
+cd tools
+python generator_tiny_record_mnist.py
 ```
 
 By default, the mnist_tiny_100.tfrecord file will be generated in the ../examples/data/mnist_tiny directory.
@@ -144,8 +144,8 @@ By default, the mnist_tiny_100.tfrecord file will be generated in the ../example
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     python lenet_mnist_train.py
+cd examples
+python lenet_mnist_train.py
 ```
 
 After execution, the default checkpoint file will be generated in ./models_ckpt/lenet_mnist, and the inference
@@ -157,8 +157,8 @@ checkpoint_eval_path of the lenet_mnist_train.py file to change the generated fi
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     python lenet_mnist_prune.py
+cd examples
+python lenet_mnist_prune.py
 ```
 
 After execution, the default checkpoint file will be generated in ./models_ckpt/lenet_mnist_pruned, and the inference
@@ -170,8 +170,8 @@ and checkpoint_eval_path of the lenet_mnist_train.py file to change the generate
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     python lenet_mnist_quantize_tflite.py
+cd examples
+python lenet_mnist_quantize_tflite.py
 ```
 
 After execution, the default checkpoint file will be generated in ./models_ckpt/lenet_mnist_pruned, and the tflite
@@ -181,8 +181,8 @@ lenet_mnist_quantize.py file to change the generated file path.
 You can enter the tools directory and execute
 
 ```shell
-     cd tools
-     python tflite_model_test_lenet_mnist.py
+cd tools
+python tflite_model_test_lenet_mnist.py
 ```
 
 Verify accuracy after quantization
@@ -192,8 +192,8 @@ Verify accuracy after quantization
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     python lenet_mnist_quantize_tftrt.py
+cd examples
+python lenet_mnist_quantize_tftrt.py
 ```
 
 After execution, the savedmodel file will be generated in ./models_eval_ckpt/lenet_mnist_quantized/lenet_mnist_tftrt/1
@@ -201,8 +201,8 @@ by default. You can also modify the export_path of the lenet_mnist_quantize.py f
 You can enter the directory and execute
 
 ```shell
-     cd tools
-     python tftrt_model_test_lenet_mnist.py
+cd tools
+python tftrt_model_test_lenet_mnist.py
 ```
 
 Verify accuracy after quantization
@@ -224,7 +224,7 @@ This step is the same as described above. You can get detailed instructions from
 Batch size is an important hyper-parameter for Deep Learning model training. If you have more GPU memory available,
 you can try larger batch size! You have to adjust the learning rate according to different batch size.
 
-|   model   |   card    | batch size | learning-rate |
+| model     | card      | batch size | learning-rate |
 | --------- | --------- | ---------- | ------------- |
 | ResNet-50 | V100 32GB | 256        | 0.1           |
 | ResNet-50 | P100 16GB | 128        | 0.05          |
