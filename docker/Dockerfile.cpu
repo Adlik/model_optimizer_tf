@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 RUN apt-get update && \
         apt-get install -y software-properties-common && \
-        apt-get update -y  && \
+        apt-get update -y && \
         apt-get install -y --no-install-recommends build-essential python3.6 python3.6-dev python3-distutils \
         curl git openssh-client openssh-server && \
         mkdir -p /var/run/sshd && \
