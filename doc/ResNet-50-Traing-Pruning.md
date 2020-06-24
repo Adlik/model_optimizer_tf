@@ -1,6 +1,6 @@
 # ResNet-50 training and pruning
 
-The following uses ResNet-50 on the ImageNet  data set to illustrate how to use the model optimizer to achieve model
+The following uses ResNet-50 on the ImageNet data set to illustrate how to use the model optimizer to achieve model
 training, pruning, and quantization.
 
 ## 1 Prepare data
