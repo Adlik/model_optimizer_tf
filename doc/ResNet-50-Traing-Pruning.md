@@ -17,8 +17,8 @@ and validation-?????-of-00128, respectively.
 Enter the tools directory and execute
 
 ```shell
-     cd tools
-     python generator_tiny_record_imagenet.py
+cd tools
+python generator_tiny_record_imagenet.py
 ```
 
 By default, the imagenet_tiny_100.tfrecord file will be generated in the ../examples/data/imagenet_tiny directory.
@@ -28,8 +28,8 @@ By default, the imagenet_tiny_100.tfrecord file will be generated in the ../exam
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_train.py
+cd examples
+horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_train.py
 ```
 
 After execution, the default checkpoint file will be generated in ./models_ckpt/resnet_50_imagenet, and the inference
@@ -44,16 +44,16 @@ pruning.
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     cp ./models_ckpt/resnet_50_imagenet/checkpoint-90.h5 ./models_ckpt/resnet_50_imagenet_pruned/checkpoint-50.h5
-     horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_prune_30_bn.py
+cd examples
+cp ./models_ckpt/resnet_50_imagenet/checkpoint-90.h5 ./models_ckpt/resnet_50_imagenet_pruned/checkpoint-50.h5
+horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_prune_30_bn.py
 ```
 
 Or you can start a training and pruning process from scratch
 
 ```shell
-     cd examples
-     horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_prune_30_bn.py
+cd examples
+horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_prune_30_bn.py
 ```
 
 After execution, the default checkpoint file will be generated in ./models_ckpt/resnet_50_imagenet_pruned, and the
@@ -65,8 +65,8 @@ checkpoint_path and checkpoint_eval_path of the resnet_50_imagenet_train.py file
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     python resnet_50_imagenet_quantize_tflite.py
+cd examples
+python resnet_50_imagenet_quantize_tflite.py
 ```
 
 After execution, the default checkpoint file will be generated in ./models_ckpt/resnet_50_imagenet_pruned, and the
@@ -76,15 +76,15 @@ of the resnet_50_imagenet_quantize.py file to change the generated file path.
 You can enter the tools directory and execute
 
 ```shell
-     cd tools
-     python tflite_model_test_resnet_50_imagenet.py
+cd tools
+python tflite_model_test_resnet_50_imagenet.py
 ```
 
 or
 
 ```shell
-     cd tools
-     mpirun --allow-run-as-root -np 64 -H localhost:64 python tflite_model_test_resnet_50_imagenet_mp.py
+cd tools
+mpirun --allow-run-as-root -np 64 -H localhost:64 python tflite_model_test_resnet_50_imagenet_mp.py
 ```
 
 Verify accuracy after quantization
@@ -94,8 +94,8 @@ Verify accuracy after quantization
 Enter the examples directory and execute
 
 ```shell
-     cd examples
-     python resnet_50_imagenet_quantize_tftrt.py
+cd examples
+python resnet_50_imagenet_quantize_tftrt.py
 ```
 
 After execution, the savedmodel file will be generated in ./models_eval_ckpt/resnet_50_imagenet_quantized
@@ -104,8 +104,8 @@ to change the generated file path.
 You can enter the directory and execute
 
 ```shell
-     cd tools
-     python tftrt_model_test_resnet_50_imagenet.py
+cd tools
+python tftrt_model_test_resnet_50_imagenet.py
 ```
 
 Verify accuracy after quantization
