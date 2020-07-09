@@ -14,7 +14,8 @@ def get_model(config, is_training=True):
     :return: class of keras Model
     """
     model_name = config.get_attribute('model_name')
-    if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50']:
+    if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50',
+                          'mobilenet_v1']:
         raise Exception('Not support model %s' % model_name)
     if model_name == 'lenet':
         from .lenet import lenet
@@ -28,5 +29,8 @@ def get_model(config, is_training=True):
     elif model_name == 'resnet_50':
         from .resnet import resnet_50
         return resnet_50(is_training)
+    elif model_name == 'mobilenet_v1':
+        from .mobilenet_v1 import mobilenet_v1_1
+        return mobilenet_v1_1(is_training=is_training)
     else:
         raise Exception('Not support model {}'.format(model_name))
