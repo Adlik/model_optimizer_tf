@@ -3,11 +3,15 @@
 """
 Quantize or prune model
 """
-
+import os
 from .quantizer import create_quantizer
 from .quantizer.config import create_config_from_obj as quant_conf_from_obj
 from .pruner.config import create_config_from_obj as prune_conf_from_obj
 from .pruner.runner import run_scheduler
+
+
+def _make_dirs(file_path):
+    os.makedirs(file_path, exist_ok=True)
 
 
 def quantize_model(request, calibration_input_fn):
@@ -19,6 +23,7 @@ def quantize_model(request, calibration_input_fn):
         calibration.
     :return:
     """
+    _make_dirs(request['export_path'])
     optimizer = create_quantizer(quant_conf_from_obj(request), calibration_input_fn)
     return optimizer.quantize()
 
@@ -29,5 +34,6 @@ def prune_model(request):
     :param request: dict, must match pruner config_schema.json
     :return:
     """
-
+    _make_dirs(request['checkpoint_path'])
+    _make_dirs(request['checkpoint_eval_path'])
     return run_scheduler(prune_conf_from_obj(request))

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Train a ResNet_50 model on the ImageNet dataset
+Train a MobileNet_v2 model on the ImageNet dataset
 """
 import os
 # If you did not execute the setup.py, uncomment the following four lines
@@ -18,15 +18,15 @@ def _main():
     base_dir = os.path.dirname(__file__)
     request = {
         "dataset": "imagenet",
-        "model_name": "resnet_50",
+        "model_name": "mobilenet_v2",
         "data_dir": os.path.join(base_dir, "./data/imagenet"),
         "batch_size": 256,
         "batch_size_val": 100,
-        "learning_rate": 0.1,
-        "epochs": 90,
-        "checkpoint_path": os.path.join(base_dir, "./models_ckpt/resnet_50_imagenet"),
+        "learning_rate": 0.05,
+        "epochs": 240,
+        "checkpoint_path": os.path.join(base_dir, "./models_ckpt/mobilenet_v2_imagenet"),
         "checkpoint_save_period": 5,  # save a checkpoint every 5 epoch
-        "checkpoint_eval_path": os.path.join(base_dir, "./models_eval_ckpt/resnet_50_imagenet"),
+        "checkpoint_eval_path": os.path.join(base_dir, "./models_eval_ckpt/mobilenet_v2_imagenet"),
         "scheduler": "train"
     }
     prune_model(request)

@@ -18,7 +18,7 @@ from model_optimizer.quantizer.calib_dataset import input_fn  # noqa: E402
 def _main():
     base_dir = os.path.dirname(__file__)
     request = {
-        "model_type": "tftrt",  # or tftrt
+        "model_type": "tftrt",  # or tflite
         "model_name": "resnet_50_tftrt",
         "input_model": os.path.join(base_dir, "./models_eval_ckpt/resnet_50_imagenet_pruned/checkpoint-120.h5"),
         "export_path": os.path.join(base_dir, "./models_eval_ckpt/resnet_50_imagenet_quantized"),

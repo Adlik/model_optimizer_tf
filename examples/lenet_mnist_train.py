@@ -17,7 +17,7 @@ from model_optimizer import prune_model  # noqa: E402
 def _main():
     base_dir = os.path.dirname(__file__)
     request = {
-        "dataset": "mnist",  # or imagenet
+        "dataset": "mnist",
         "model_name": "lenet",
         "data_dir": os.path.join(base_dir, "./data/mnist"),
         "batch_size": 120,
