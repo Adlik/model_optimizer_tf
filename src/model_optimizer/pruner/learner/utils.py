@@ -4,6 +4,7 @@
 """
 Learner callbacks utility
 """
+import math
 import horovod.tensorflow.keras as hvd
 
 
@@ -36,3 +37,16 @@ def get_call_backs(lr_schedulers):
                                                                         end_epoch=end_epoch,
                                                                         multiplier=float(lr_func['multiplier'])))
     return callbacks
+
+
+def cosine_multiplier(epoch, total_epoch=240):
+    """
+    Applies cosine decay to the learning rate.
+    :param epoch: current epoch
+    :param total_epoch: total epochs
+    :return: decayed learning rate
+    """
+    if epoch >= total_epoch:
+        return 0.5 + 0.5 * math.cos(math.pi * (total_epoch-1) / total_epoch)
+    else:
+        return 0.5 + 0.5 * math.cos(math.pi * epoch / total_epoch)
