@@ -10,5 +10,5 @@ source = src
          */site-packages
 
 [report]
-fail_under = 10
+fail_under = 14
 
