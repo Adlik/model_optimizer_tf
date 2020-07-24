@@ -19,7 +19,7 @@ Take ResNet-50 as an example to illustrate how to test the model performance
    mkdir -p benchmark/tests/test_model/resnet50_keras/model  
    ```
 
-3. change the working directory into benchmark tools directory, execute the shell script automatic_test.sh, which can 
+3. change the working directory into benchmark tools directory, execute the shell script automatic_test.sh, which can
 auto test the performance of ResNet50
 
    ```sh
@@ -42,4 +42,3 @@ auto test the performance of ResNet50
 > > i. ResNet-50 is the baseline of training
 > >
 > > ii. ResNet-50-L1-0.3 denotes ResNet-50 model use L1 norm filter pruning, pruning rate is 30%
-
