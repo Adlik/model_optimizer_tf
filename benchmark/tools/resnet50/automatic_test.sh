@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-cd ../../../../
-git clone https://github.com/Adlik/Adlik.git
-base_path=$(cd `dirname $0`; pwd)
+current_path=$(cd `dirname $0`; pwd)
+echo "current_path: "$current_path
+base_path=$current_path/../../../..
 echo "base_path: "$base_path
+cd $base_path
+git clone https://github.com/Adlik/Adlik.git
 optimizer_benchmark_path=$base_path/model_optimizer/benchmark
 adlik_benchmark_path=$base_path/Adlik/benchmark
 adlik_path=$base_path/Adlik 
