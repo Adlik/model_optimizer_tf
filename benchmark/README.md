@@ -27,3 +27,20 @@ Take ResNet-50 as an example to illustrate how to test the model performance
    ```
 
 4. you can also test the performance of optimized model of ResnNet-50. Put the  resnet50_pruned.h5 under model directory  and execute the shell script automatic_test_pruned.sh
+
+## The test result of the model in keras-tfGPU2.1
+
+|                  | speed of client (pictures/sec) | speed of serving engine (pictures/sec) | tail latency of one picture (sec) |
+| ---------------- | :----------------------------: | :------------------------------------: | :-------------------------------: |
+| ResNet-50        |            184.872             |                480.882                 |              0.00333              |
+| ResNet-50-L1-0.3 |            191.531             |                518.280                 |              0.00329              |
+
+
+
+> Note
+>
+> > i. ResNet-50 is the baseline of training
+> >
+> > ii. ResNet-50-L1-0.3 denotes ResNet-50 model use L1 norm filter pruning, pruning rate is 30%
+
+
