@@ -1,0 +1,22 @@
+{
+  "serving_type": "tf",
+  "input_model": "model/resnet50_pruned.h5",
+  "export_path": "model_repos_imagenet_resnet50_pruned_keras",
+  "input_layer_names": [
+    "input"
+  ],
+  "output_layer_names": [
+    "dense1"
+  ],
+  "input_formats": [
+    "channels_last"
+  ],
+  "input_signatures": [
+    "image"
+  ],
+  "output_signatures": [
+    "label"
+  ],
+  "model_name": "resnet50_pruned",
+  "max_batch_size": 256
+}
