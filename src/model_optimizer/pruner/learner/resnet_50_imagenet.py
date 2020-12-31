@@ -54,6 +54,7 @@ class Learner(LearnerBase):
     def get_losses(self, is_training=True):
         """
         Model compile losses
+        :param is_training: is training or not
         :return: Return model compile losses
         """
         softmax_loss = tf.keras.losses.SparseCategoricalCrossentropy()
@@ -66,10 +67,10 @@ class Learner(LearnerBase):
             else:
                 return [None, logits_loss]
 
-
     def get_metrics(self, is_training=True):
         """
         Model compile metrics
+        :param is_training: is training or not
         :return: Return model compile metrics
         """
         if self.config.get_attribute('scheduler') == 'distill' and is_training:
@@ -89,7 +90,7 @@ class Learner(LearnerBase):
         if self.config.get_attribute('scheduler') == 'distill':
             for layer_eval in eval_model.layers:
                 for layer in train_model.layers:
-                    if (layer.name == 'resnet' and layer_eval.name == 'resnet'):
+                    if layer.name == 'resnet' and layer_eval.name == 'resnet':
                         layer_eval.set_weights(layer.get_weights())
                         student_eval = layer_eval
                         break
