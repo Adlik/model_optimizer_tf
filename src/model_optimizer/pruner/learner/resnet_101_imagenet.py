@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Resnet-50 on imagenet Learner definition
+Resnet-101 on imagenet Learner definition
 """
 import os
 import tensorflow as tf
@@ -12,7 +12,7 @@ from .learner_base import LearnerBase
 
 class Learner(LearnerBase):
     """
-    Resnet-50 on imagenet Learner
+    Resnet-101 on imagenet Learner
     """
     def __init__(self, config):
         super(Learner, self).__init__(config)
@@ -33,8 +33,8 @@ class Learner(LearnerBase):
             # Horovod: after the warmup reduce learning rate by 10 on the 30th, 60th and 80th epochs.
             hvd.callbacks.LearningRateScheduleCallback(start_epoch=5, end_epoch=30, multiplier=1.),
             hvd.callbacks.LearningRateScheduleCallback(start_epoch=30, end_epoch=60, multiplier=1e-1),
-            hvd.callbacks.LearningRateScheduleCallback(start_epoch=60, end_epoch=80, multiplier=1e-2),
-            hvd.callbacks.LearningRateScheduleCallback(start_epoch=80, multiplier=1e-3),
+            hvd.callbacks.LearningRateScheduleCallback(start_epoch=60, end_epoch=90, multiplier=1e-2),
+            hvd.callbacks.LearningRateScheduleCallback(start_epoch=90, multiplier=1e-3),
         ]
         # Horovod: save checkpoints only on worker 0 to prevent other workers from corrupting them.
         if hvd.rank() == 0:

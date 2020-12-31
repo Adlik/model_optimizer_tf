@@ -20,6 +20,9 @@ def get_learner(config):
     elif model_name == 'resnet_50' and dataset_name == 'imagenet':
         from .resnet_50_imagenet import Learner
         return Learner(config)
+    elif model_name == 'resnet_101' and dataset_name == 'imagenet':
+        from .resnet_101_imagenet import Learner
+        return Learner(config)
     elif model_name == 'mobilenet_v1' and dataset_name == 'imagenet':
         from .mobilenet_v1_imagenet import Learner
         return Learner(config)

@@ -26,7 +26,7 @@ def config_get_epochs_to_train(config):
     :return:
     """
     scheduler_config = get_scheduler(config)
-    if scheduler_config is None:
+    if scheduler_config is None or config.get_attribute('scheduler') == 'distill':
         return 0, [], None
     return get_epochs_lr_to_train(scheduler_config)
 

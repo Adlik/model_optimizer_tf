@@ -62,7 +62,7 @@ class DatasetBase:
         else:
             return self.num_samples_of_val
 
-    def build(self):
+    def build(self, is_distill=False):
         """
         Build dataset
         :return: batch of a dataset
@@ -73,7 +73,10 @@ class DatasetBase:
         dataset = dataset.interleave(self.dataset_fn, cycle_length=10, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         if self.is_training:
             dataset = dataset.shuffle(buffer_size=self.buffer_size).repeat()
-        dataset = dataset.map(self.parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if is_distill:
+            dataset = dataset.map(self.parse_fn_distill, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        else:
+            dataset = dataset.map(self.parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return self.__build_batch(dataset)
 
     def __build_batch(self, dataset):
