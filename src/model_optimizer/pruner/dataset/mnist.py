@@ -20,7 +20,7 @@ class MnistDataset(DatasetBase):
         :param is_training: whether to construct the training subset
         :return:
         """
-        super(MnistDataset, self).__init__(config, is_training)
+        super().__init__(config, is_training)
         if is_training:
             self.file_pattern = os.path.join(self.data_dir, 'train.tfrecords')
             self.batch_size = self.batch_size

@@ -60,7 +60,8 @@ setup(
     package_data={
         'model_optimizer': ['**/*.json',
                             'pruner/scheduler/uniform_auto/*.yaml',
-                            'pruner/scheduler/uniform_specified_layer/*.yaml']
+                            'pruner/scheduler/uniform_specified_layer/*.yaml',
+                            'pruner/scheduler/distill/*.yaml']
     },
 
 )

@@ -2,11 +2,12 @@
 Tests for the model_optimizer package.
 """
 import tensorflow as tf
+import numpy as np
 from model_optimizer.pruner.core import AutoPruner
 from model_optimizer.pruner.core import SpecifiedLayersPruner
-import numpy as np
 
 
+# noqa: ignore=C901
 def test_uniform_auto_prune():
     """
     Test the AutoPruner prune function.

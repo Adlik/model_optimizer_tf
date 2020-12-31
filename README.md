@@ -8,7 +8,8 @@ sparsity pruning depends on special algorithms and hardware to achieve accelerat
 Adlik pruning focuses on channel pruning and filter pruning, which can really reduce the number of parameters and
 flops. In terms of quantization, Adlik focuses on 8-bit quantization that is easier to accelerate on specific hardware.
 After testing, it is found that running a small batch of datasets can obtain a quantitative model with little loss of
-accuracy, so Adlik focuses on this method.
+accuracy, so Adlik focuses on this method. Knowledge distillation is another way to improve the performance of deep  
+learning algorithm. It is possible to compress the knowledge in the big model into a smaller model.
 
 The proposed framework mainly consists of two categories of algorithm components, i.e. pruner and quantizer. The
 pruner is mainly composed of five modules:core, scheduler, models, dataset and learner. The core module defines
@@ -34,6 +35,14 @@ The following table is the size of the above model files:
 | --------- | ------------ | ------------------ | --------------------- | -------------------- |
 | LeNet-5   | 1176KB       | 499KB(59% pruned)  | 120KB                 | 1154KB (pb)          |
 | ResNet-50 | 99MB         | 67MB(31.9% pruned) | 18MB                  | 138MB(pb)            |
+
+Knowledge distillation is an effective way to imporve the performance of model.
+
+The following table  shows the distillation result of  ResNet-50 as the student network where ResNet-101 as the teacher network.
+
+| student model | ResNet-101 distilled | accuracy change |
+| ------------- | -------------------- | --------------- |
+| ResNet-50     | 77.14%               | +0.97%          |
 
 ## 1. Pruning and quantization principle
 
@@ -62,6 +71,16 @@ required. It takes a lot of computing power to complete the quantification of th
 quantization, only need to have inference model and very little calibration data to complete, and the accuracy loss
 of quantization is very small, and even some models will rise. Adlik only needs 100 sample images to complete the
 quantification of ResNet-50 in less than one minute.
+
+### 1.3 Knowledge Distillation
+
+Knowledge distillation is a compression technique by which the knowledge of a larger model(teacher) is transfered into
+a smaller one(student). During distillation, a student model learns from a teacher model to generalize well by raise
+the temperature of the final softmax of the teacher model as the soft set of targets.  
+
+![Distillation](imgs/distillation.png)
+
+Refer to the paper [Distilling the Knowledge in a Neural Network](https://arxiv.org/pdf/1503.02531.pdf)
 
 ## 2. Installation
 

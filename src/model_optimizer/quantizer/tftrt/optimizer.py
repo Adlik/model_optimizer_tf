@@ -19,7 +19,7 @@ class Quantizer(BaseQuantizer):
     """
 
     def __init__(self, config, calibration_input_fn):
-        super(Quantizer, self).__init__(config)
+        super().__init__(config)
         self.calibration_input_fn = calibration_input_fn
 
     def _do_quantize(self):
