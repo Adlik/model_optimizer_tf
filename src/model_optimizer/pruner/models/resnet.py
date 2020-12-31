@@ -103,6 +103,15 @@ def resnet_101(is_training):
     return resnet(101, is_training=is_training)
 
 
+def resnet_101(is_training):
+    """
+    Build resnet-101 model
+    :param is_training: if training or not
+    :return: resnet-101 model
+    """
+    return resnet(101, is_training=is_training)
+
+
 def residual_block(stage, block_num, input_data, filters, kernel_size, is_training):
     """
     residual block

@@ -162,14 +162,15 @@ class LearnerBase(metaclass=abc.ABCMeta):
     def eval(self):
         """
         Model eval process, only evaluate on rank 0
+        the format of score is like as follows:
+        {loss: 7.6969  dense1_loss: 5.4490  softmax_1_sparse_categorical_accuracy: 0.0665
+        dense1_sparse_categorical_accuracy: 0.0665}
         :return:
         """
         if hvd.rank() != 0:
             return
         eval_model = self.models_eval[-1]
         score = eval_model.evaluate(self.eval_dataset, steps=self.eval_steps_per_epoch)
-        # loss: 7.6969 - dense1_loss: 5.4490 - softmax_1_sparse_categorical_accuracy: 0.0665 - dense1_sparse_categorical_accuracy: 0.0665
-        # print("####### score", score)
         loss = score[0]
         if self.config.get_attribute("classifier_activation", "softmax") == "softmax":
             accuracy = score[2]

@@ -2,7 +2,21 @@ import tensorflow as tf
 
 
 class DistillLossLayer(tf.keras.layers.Layer):
-    def __init__(self,alpha, temperature, teacher_path, name="DistillLoss", **kwargs):
+    """
+    Layer to compute the loss for distillation.
+    the total loss =  the student loss + the distillation loss
+
+    Arguments:
+        alpha: a float between [0.0, 1.0]. It corresponds to the importance between the student loss and the
+        distillation loss.
+        temperature: the temperature of distillation.  Defaults to 10.
+        teacher_path: the model path of teacher. The format of the  model is h5.
+        name: String, name to use for this layer. Defaults to 'DistillLoss'.
+
+    Call arguments:
+      inputs: inputs of the layer. It corresponds to [input, y_true, y_prediction]
+    """
+    def __init__(self, teacher_path, alpha=1.0, temperature=10, name="DistillLoss", **kwargs):
         super(DistillLossLayer, self).__init__(name=name, **kwargs)
         self.alpha = alpha
         self.temperature = temperature
@@ -12,9 +26,7 @@ class DistillLossLayer(tf.keras.layers.Layer):
 
     def call(self, inputs, **kwargs):
         x, y_true, y_pred = inputs
-
         rtn_loss = None
-
         if y_true is not None:
             student_loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(y_true, y_pred)
             self.teacher.trainable = False

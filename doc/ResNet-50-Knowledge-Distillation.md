@@ -32,9 +32,8 @@ Enter the examples directory and execute
 ```shell
 horovodrun -np 8 -H localhost:8 python resnet_50_imagenet_distill.py
 ```
-
-After execution, the default checkpoint file will be generated in ./models_ckpt/resnet_50_imagenet_distill_adlik, and
-the inference checkpoint file will be generated in ./models_eval_ckpt/resnet_50_imagenet_distill_adlik. You can also 
+After execution, the default checkpoint file will be generated in ./models_ckpt/resnet_50_imagenet_distill, and
+the inference checkpoint file will be generated in ./models_eval_ckpt/resnet_50_imagenet_distill. You can also 
 modify the checkpoint_path and checkpoint_eval_path of the resnet_50_imagenet_distill.py file to change the generated 
 file path.
 

@@ -65,6 +65,7 @@ class DatasetBase:
     def build(self, is_distill=False):
         """
         Build dataset
+        :param is_distill: is distilling or not
         :return: batch of a dataset
         """
         dataset = tf.data.Dataset.list_files(self.file_pattern, shuffle=True)
