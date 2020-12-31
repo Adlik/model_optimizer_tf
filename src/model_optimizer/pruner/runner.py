@@ -55,3 +55,7 @@ def run_scheduler(config):
         learner.save_eval_model()
         learner.build_eval()
         learner.eval()
+    # test
+    # learner.save_eval_model()
+    # learner.build_eval()
+    # learner.eval()

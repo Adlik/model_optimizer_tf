@@ -12,6 +12,7 @@ from ..dataset import get_dataset
 from ..models import get_model
 from .utils import get_call_backs
 from ...stat import print_keras_model_summary, print_keras_model_params_flops
+from ..distill.distill_loss import DistillLossLayer
 
 
 class LearnerBase(metaclass=abc.ABCMeta):
@@ -48,7 +49,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         eval_model = tf.keras.models.clone_model(origin_eval_model)
         self.models_train.append(train_model)
         self.models_eval.append(eval_model)
-        self.train_dataset, self.eval_dataset = self.build_dataset()
+        self.train_dataset, self.eval_dataset, self.train_dataset_distill, self.eval_dataset_distill = self.build_dataset()
         self.build_train()
         self.build_eval()
         self.load_model()
@@ -99,7 +100,15 @@ class LearnerBase(metaclass=abc.ABCMeta):
         ds_eval = get_dataset(self.config, is_training=False)
         self.eval_steps_per_epoch = ds_eval.steps_per_epoch
         eval_dataset = ds_eval.build()
-        return train_dataset, eval_dataset
+        train_dataset_distill = None
+        eval_dataset_distill = None
+        if(self.config.get_attribute("scheduler") == "distill"):
+            ds_train_distill = get_dataset(self.config, is_training=True, num_shards=hvd.size(), shard_index=hvd.rank())
+            train_dataset_distill = ds_train_distill.build(True)
+            ds_eval_distill = get_dataset(self.config, is_training=False)
+            eval_dataset_distill = ds_eval_distill.build(True)
+
+        return train_dataset, eval_dataset, train_dataset_distill, eval_dataset_distill
 
     def build_train(self):
         """
@@ -120,9 +129,9 @@ class LearnerBase(metaclass=abc.ABCMeta):
         Model compile for eval model
         :return:
         """
-        loss = self.get_losses()
+        loss = self.get_losses(False)
         optimizer = self.get_optimizer()
-        metrics = self.get_metrics()
+        metrics = self.get_metrics(False)
         eval_model = self.models_eval[-1]
         eval_model.compile(loss=loss,
                            optimizer=optimizer,
@@ -142,7 +151,11 @@ class LearnerBase(metaclass=abc.ABCMeta):
                 self.callbacks.append(tf.keras.callbacks.ModelCheckpoint(os.path.join(self.checkpoint_path,
                                                                                       './checkpoint-{epoch}.h5'),
                                                                          period=self.checkpoint_save_period))
-        train_model.fit(self.train_dataset, initial_epoch=initial_epoch, steps_per_epoch=self.train_steps_per_epoch,
+        if self.config.get_attribute('scheduler')=='distill':
+            train_dataset = self.train_dataset_distill
+        else:
+            train_dataset = self.train_dataset
+        train_model.fit(train_dataset, initial_epoch=initial_epoch, steps_per_epoch=self.train_steps_per_epoch,
                         epochs=epochs, verbose=self.verbose, callbacks=self.callbacks)
         self.cur_epoch += epochs-initial_epoch
 
@@ -155,8 +168,16 @@ class LearnerBase(metaclass=abc.ABCMeta):
             return
         eval_model = self.models_eval[-1]
         score = eval_model.evaluate(self.eval_dataset, steps=self.eval_steps_per_epoch)
-        print('Test loss:', score[0])
-        print('Test accuracy:', score[1])
+        # loss: 7.6969 - dense1_loss: 5.4490 - softmax_1_sparse_categorical_accuracy: 0.0665 - dense1_sparse_categorical_accuracy: 0.0665
+        # print("####### score", score)
+        loss = score[0]
+        if self.config.get_attribute("classifier_activation", "softmax") == "softmax":
+            accuracy = score[2]
+        else:
+            accuracy = score[3]
+
+        print('Test loss:', loss)
+        print('Test accuracy:', accuracy)
 
     def get_latest_train_model(self):
         """
@@ -209,6 +230,14 @@ class LearnerBase(metaclass=abc.ABCMeta):
         Load checkpoint and update cur_epoch resume_from_epoch train_model
         :return:
         """
+        _custom_objects = {
+            'DistillLossLayer': DistillLossLayer
+        }
+        if self.config.get_attribute('scheduler') == 'distill':
+            custom_objects = _custom_objects
+        else:
+            custom_objects = None
+
         self.resume_from_epoch = 0
         for try_epoch in range(self.epochs, 0, -1):
             if os.path.exists(os.path.join(self.checkpoint_path, self.checkpoint_format.format(epoch=try_epoch))):
@@ -218,7 +247,8 @@ class LearnerBase(metaclass=abc.ABCMeta):
             self.cur_epoch = self.resume_from_epoch
             model = tf.keras.models.load_model(
                 os.path.join(self.checkpoint_path,
-                             self.checkpoint_format.format(epoch=self.resume_from_epoch)))
+                             self.checkpoint_format.format(epoch=self.resume_from_epoch))
+                , custom_objects=custom_objects)
             self.train_models_update(model)
 
     def save_eval_model(self):
@@ -230,6 +260,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
             return
         train_model = self.models_train[-1]
         eval_model = self.models_eval[-1]
+
         clone_model = tf.keras.models.clone_model(eval_model)
         for i, layer in enumerate(clone_model.layers):
             if 'Conv2D' in str(type(layer)):

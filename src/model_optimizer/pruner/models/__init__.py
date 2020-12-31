@@ -4,7 +4,8 @@
 """
 Get model
 """
-
+from ..scheduler.common import get_scheduler
+from ..distill.distiller import get_distiller
 
 def get_model(config, is_training=True):
     """
@@ -14,7 +15,8 @@ def get_model(config, is_training=True):
     :return: class of keras Model
     """
     model_name = config.get_attribute('model_name')
-    if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50',
+    scheduler_config = get_scheduler(config)
+    if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50', 'resnet_101',
                           'mobilenet_v1', 'mobilenet_v2']:
         raise Exception('Not support model %s' % model_name)
     if model_name == 'lenet':
@@ -28,7 +30,15 @@ def get_model(config, is_training=True):
         return resnet_18(is_training)
     elif model_name == 'resnet_50':
         from .resnet import resnet_50
-        return resnet_50(is_training)
+        student_model = resnet_50(is_training)
+        if config.get_attribute('scheduler') == 'distill':
+            distill_model = get_distiller(student_model,scheduler_config)
+            return distill_model
+        else:
+            return student_model
+    elif model_name == 'resnet_101':
+        from .resnet import resnet_101
+        return resnet_101(is_training)
     elif model_name == 'mobilenet_v1':
         from .mobilenet_v1 import mobilenet_v1_1
         return mobilenet_v1_1(is_training=is_training)
@@ -37,3 +47,5 @@ def get_model(config, is_training=True):
         return mobilenet_v2_1(is_training=is_training)
     else:
         raise Exception('Not support model {}'.format(model_name))
+
+
