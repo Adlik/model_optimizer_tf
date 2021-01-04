@@ -8,7 +8,7 @@ def get_distiller(student_model, scheduler_config):
     input_lbl = tf.keras.layers.Input((), name="label", dtype='int32')
     student = student_model
     _, logits = student(input_img)
-    total_loss = DistillLossLayer(scheduler_config['alpha'], scheduler_config['temperature'], scheduler_config['teacher_path'])([input_img, input_lbl, logits])
+    total_loss = DistillLossLayer(scheduler_config['teacher_path'],scheduler_config['alpha'], scheduler_config['temperature'])([input_img, input_lbl, logits])
     distill_model = tf.keras.Model(inputs=[input_img, input_lbl], outputs=[logits, total_loss])
 
     return distill_model
