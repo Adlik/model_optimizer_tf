@@ -30,7 +30,7 @@ class Learner(LearnerBase):
             # accuracy. Scale the learning rate `lr = 1.0` ---> `lr = 1.0 * hvd.size()` during
             # the first five epochs. See https://arxiv.org/abs/1706.02677 for details.
             hvd.callbacks.LearningRateWarmupCallback(warmup_epochs=5, verbose=0),
-            # Horovod: after the warmup reduce learning rate by 10 on the 30th, 60th and 80th epochs.
+            # Horovod: after the warmup reduce learning rate by 10 on the 30th, 60th and 90th epochs.
             hvd.callbacks.LearningRateScheduleCallback(start_epoch=5, end_epoch=30, multiplier=1.),
             hvd.callbacks.LearningRateScheduleCallback(start_epoch=30, end_epoch=60, multiplier=1e-1),
             hvd.callbacks.LearningRateScheduleCallback(start_epoch=60, end_epoch=90, multiplier=1e-2),
@@ -76,34 +76,3 @@ class Learner(LearnerBase):
         if self.config.get_attribute('scheduler') == 'distill' and is_training:
             return None
         return ['sparse_categorical_accuracy']
-
-    def save_eval_model(self):
-        """
-        Save evaluate model
-        :return:
-        """
-        if hvd.rank() != 0:
-            return
-        train_model = self.models_train[-1]
-        eval_model = self.models_eval[-1]
-        save_model_path = os.path.join(self.save_model_path, 'checkpoint-') + str(self.cur_epoch) + '.h5'
-        if self.config.get_attribute('scheduler') == 'distill':
-            for layer_eval in eval_model.layers:
-                for layer in train_model.layers:
-                    if (layer.name == 'resnet' and layer_eval.name == 'resnet'):
-                        layer_eval.set_weights(layer.get_weights())
-                        student_eval = layer_eval
-                        break
-            student_eval.save(save_model_path)
-            self.eval_models_update(student_eval)
-        else:
-            clone_model = tf.keras.models.clone_model(eval_model)
-            for i, layer in enumerate(clone_model.layers):
-                if 'Conv2D' in str(type(layer)):
-                    clone_model.layers[i].filters = train_model.get_layer(layer.name).filters
-                elif 'Dense' in str(type(layer)):
-                    clone_model.layers[i].units = train_model.get_layer(layer.name).units
-            pruned_eval_model = tf.keras.models.model_from_json(clone_model.to_json())
-            pruned_eval_model.set_weights(train_model.get_weights())
-            pruned_eval_model.save(save_model_path)
-            self.eval_models_update(pruned_eval_model)

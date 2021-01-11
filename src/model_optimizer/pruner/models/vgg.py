@@ -11,48 +11,56 @@ BATCH_NORM_DECAY = 0.9
 BATCH_NORM_EPSILON = 1e-5
 
 
-def vgg_16(is_training, num_classes=1001, use_l2_regularizer=True):
+def vgg_16(is_training, name, num_classes=1001, use_l2_regularizer=True):
     """
     VGG-16 model
     :param is_training: if training or not
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
     :return:
     """
-    return vgg(ver='D', is_training=is_training, num_classes=num_classes, use_l2_regularizer=use_l2_regularizer)
+    return vgg(ver='D', is_training=is_training, name=name, num_classes=num_classes,
+               use_l2_regularizer=use_l2_regularizer)
 
 
-def vgg_19(is_training, num_classes=1001, use_l2_regularizer=True):
+def vgg_19(is_training, name, num_classes=1001, use_l2_regularizer=True):
     """
     VGG-19 model
     :param is_training: if training or not
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
     :return:
     """
-    return vgg(ver='E', is_training=is_training, num_classes=num_classes, use_l2_regularizer=use_l2_regularizer)
+    return vgg(ver='E', is_training=is_training, name=name, num_classes=num_classes,
+               use_l2_regularizer=use_l2_regularizer)
 
 
-def vgg_m_16(is_training, num_classes=10, use_l2_regularizer=True):
+def vgg_m_16(is_training, name, num_classes=10, use_l2_regularizer=True):
     """
     VGG-M-16 model
     :param is_training: if training or not
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
     :return:
     """
-    return vgg_m(ver='D', is_training=is_training, num_classes=num_classes, use_l2_regularizer=use_l2_regularizer)
+    return vgg_m(ver='D', is_training=is_training, name=name, num_classes=num_classes,
+                 use_l2_regularizer=use_l2_regularizer)
 
 
-def vgg_m_19(is_training, num_classes=10, use_l2_regularizer=True):
+def vgg_m_19(is_training, name, num_classes=10, use_l2_regularizer=True):
     """
     VGG-M-19 model
     :param is_training: if training or not
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
     :return:
     """
-    return vgg_m(ver='E', is_training=is_training, num_classes=num_classes, use_l2_regularizer=use_l2_regularizer)
+    return vgg_m(ver='E', is_training=is_training, name=name, num_classes=num_classes,
+                 use_l2_regularizer=use_l2_regularizer)
 
 
 def _gen_l2_regularizer(use_l2_regularizer=True):
@@ -73,11 +81,12 @@ def _vgg_blocks(block, conv_num, filters, x, is_training, use_l2_regularizer=Tru
     return x
 
 
-def vgg(ver, is_training, num_classes=1001, use_l2_regularizer=True):
+def vgg(ver, is_training, name, num_classes=1001, use_l2_regularizer=True):
     """
     VGG models
     :param ver: 'D' or 'E'
     :param is_training: if training or not
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
     :return:
@@ -113,15 +122,16 @@ def vgg(ver, is_training, num_classes=1001, use_l2_regularizer=True):
                                     kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                                     bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                                     name='fc3')(x)
-    model = tf.keras.Model(inputs, outputs)
+    model = tf.keras.Model(inputs, outputs, name=name)
     return model
 
 
-def vgg_m(ver, is_training, num_classes=10, use_l2_regularizer=True):
+def vgg_m(ver, is_training, name, num_classes=10, use_l2_regularizer=True):
     """
     VGG-M models
     :param ver: 'D' or 'E'
     :param is_training: if training or not
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
     :return:
@@ -148,5 +158,5 @@ def vgg_m(ver, is_training, num_classes=10, use_l2_regularizer=True):
                                     kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                                     bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                                     name='fc2')(x)
-    model = tf.keras.Model(inputs, outputs)
+    model = tf.keras.Model(inputs, outputs, name=name)
     return model

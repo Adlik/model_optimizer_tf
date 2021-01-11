@@ -20,10 +20,11 @@ def _gen_l2_regularizer(use_l2_regularizer=True):
     return tf.keras.regularizers.l2(L2_WEIGHT_DECAY) if use_l2_regularizer else None
 
 
-def resnet(layer_num, num_classes=1001, use_l2_regularizer=True, is_training=True):
+def resnet(layer_num, name, num_classes=1001, use_l2_regularizer=True, is_training=True):
     """
     Build resnet-18 resnet-34 resnet-50 resnet-101 resnet-152 model
     :param layer_num: 18, 34, 50, 101, 152
+    :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2_regularizer
     :param is_training: if training or not
@@ -62,44 +63,48 @@ def resnet(layer_num, num_classes=1001, use_l2_regularizer=True, is_training=Tru
                                    kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                                    bias_regularizer=_gen_l2_regularizer(use_l2_regularizer), name='dense1')(x)
     outputs = tf.keras.layers.Softmax()(logits)
-    model = tf.keras.Model(inputs, [outputs, logits], name="resnet")
+    model = tf.keras.Model(inputs, [outputs, logits], name=name)
     return model
 
 
-def resnet_18(is_training):
+def resnet_18(is_training, name):
     """
     Build resnet-18 model
     :param is_training: if training or not
+    :param name: the model name
     :return: resnet-18 model
     """
-    return resnet(18, is_training=is_training)
+    return resnet(18, is_training=is_training, name=name)
 
 
-def resnet_34(is_training):
+def resnet_34(is_training, name):
     """
     Build resnet-34 model
     :param is_training: if training or not
+    :param name: the model name
     :return: resnet-34 model
     """
-    return resnet(34, is_training=is_training)
+    return resnet(34, is_training=is_training, name=name)
 
 
-def resnet_50(is_training):
+def resnet_50(is_training, name):
     """
     Build resnet-50 model
     :param is_training: if training or not
+    :param name: the model name
     :return: resnet-50 model
     """
-    return resnet(50, is_training=is_training)
+    return resnet(50, is_training=is_training, name=name)
 
 
-def resnet_101(is_training):
+def resnet_101(is_training, name):
     """
     Build resnet-101 model
     :param is_training: if training or not
+    :param name: the model name
     :return: resnet-101 model
     """
-    return resnet(101, is_training=is_training)
+    return resnet(101, is_training=is_training, name=name)
 
 
 def residual_block(stage, block_num, input_data, filters, kernel_size, is_training):

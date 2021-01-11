@@ -7,9 +7,12 @@ Lenet model
 import tensorflow as tf
 
 
-def lenet(is_training=True):
+def lenet(name, is_training=True):
     """
     This implements a slightly modified LeNet-5 [LeCun et al., 1998a]
+    :param name: the model name
+    :param is_training: if training or not
+    :return: LeNet model
     """
     input_ = tf.keras.layers.Input(shape=(28, 28, 1), name='input')
     x = tf.keras.layers.Conv2D(filters=6,
@@ -31,5 +34,5 @@ def lenet(is_training=True):
     x = tf.keras.layers.Dense(120, activation='relu', name='dense_1')(x)
     x = tf.keras.layers.Dense(84, activation='relu', name='dense_2')(x)
     output_ = tf.keras.layers.Dense(10, activation='softmax', name='dense_3')(x)
-    model = tf.keras.Model(input_, output_)
+    model = tf.keras.Model(input_, output_, name=name)
     return model

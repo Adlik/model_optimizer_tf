@@ -53,7 +53,7 @@ def keras_model_predict(request, file_path):
     cur_steps = 0
     start = time.time()
     for x_test, y_test in val_dataset:
-        result = keras_model.predict(x_test)
+        result, _ = keras_model.predict(x_test)
         output_data = tf.keras.backend.argmax(result)
         for j in range(y_test.shape[0]):
             if int(output_data[j]) == int(y_test[j]):

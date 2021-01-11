@@ -262,18 +262,28 @@ class LearnerBase(metaclass=abc.ABCMeta):
             return
         train_model = self.models_train[-1]
         eval_model = self.models_eval[-1]
-
-        clone_model = tf.keras.models.clone_model(eval_model)
-        for i, layer in enumerate(clone_model.layers):
-            if 'Conv2D' in str(type(layer)):
-                clone_model.layers[i].filters = train_model.get_layer(layer.name).filters
-            elif 'Dense' in str(type(layer)):
-                clone_model.layers[i].units = train_model.get_layer(layer.name).units
-        pruned_eval_model = tf.keras.models.model_from_json(clone_model.to_json())
-        pruned_eval_model.set_weights(train_model.get_weights())
-        save_model_path = os.path.join(self.save_model_path, 'checkpoint-') + str(self.cur_epoch)+'.h5'
-        pruned_eval_model.save(save_model_path)
-        self.eval_models_update(pruned_eval_model)
+        save_model_path = os.path.join(self.save_model_path, 'checkpoint-') + str(self.cur_epoch) + '.h5'
+        if self.config.get_attribute('scheduler') == 'distill':
+            model_name = self.config.get_attribute('model_name')
+            for layer_eval in eval_model.layers:
+                for layer in train_model.layers:
+                    if layer.name == model_name and layer_eval.name == model_name:
+                        layer_eval.set_weights(layer.get_weights())
+                        student_eval = layer_eval
+                        break
+            student_eval.save(save_model_path)
+            self.eval_models_update(student_eval)
+        else:
+            clone_model = tf.keras.models.clone_model(eval_model)
+            for i, layer in enumerate(clone_model.layers):
+                if 'Conv2D' in str(type(layer)):
+                    clone_model.layers[i].filters = train_model.get_layer(layer.name).filters
+                elif 'Dense' in str(type(layer)):
+                    clone_model.layers[i].units = train_model.get_layer(layer.name).units
+            pruned_eval_model = tf.keras.models.model_from_json(clone_model.to_json())
+            pruned_eval_model.set_weights(train_model.get_weights())
+            pruned_eval_model.save(save_model_path)
+            self.eval_models_update(pruned_eval_model)
 
     def print_model_summary(self):
         """
