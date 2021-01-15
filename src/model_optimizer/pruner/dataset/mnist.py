@@ -33,6 +33,7 @@ class MnistDataset(DatasetBase):
         self.num_samples_of_val = 10000
 
     # pylint: disable=R0201
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data

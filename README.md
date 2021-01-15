@@ -121,7 +121,7 @@ rm -rf /tmp/openmpi
 #### 2.2.2 Install python package
 
 ```shell
-pip install tensorflow-gpu==2.1.0
+pip install tensorflow-gpu==2.3.0
 pip install horovod==0.19.1
 pip install mpi4py
 pip install networkx

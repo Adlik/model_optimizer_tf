@@ -3,7 +3,8 @@ FROM ubuntu:18.04
 RUN apt-get update && \
         apt-get install -y software-properties-common && \
         apt-get update -y && \
-        apt-get install -y --no-install-recommends build-essential python3.6 python3.6-dev python3-distutils \
+        apt-get install -y --no-install-recommends --allow-downgrades --allow-change-held-packages \
+        build-essential python3.6 python3.6-dev python3-distutils \
         curl git openssh-client openssh-server && \
         mkdir -p /var/run/sshd && \
         mkdir -p /root/work && \
@@ -26,7 +27,7 @@ RUN mkdir /tmp/openmpi && \
     rm -rf /tmp/openmpi
 
 # Install Tensorflow and Horovod
-RUN pip install --no-cache-dir tensorflow==2.1.0
+RUN pip install --no-cache-dir tensorflow==2.3.0
 
 RUN HOROVOD_WITH_TENSORFLOW=1 pip install --no-cache-dir horovod==0.19.1
 

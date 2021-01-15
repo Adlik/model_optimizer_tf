@@ -33,6 +33,7 @@ class ImagenetDataset(DatasetBase):
         self.num_samples_of_train = 1281167
         self.num_samples_of_val = 50000
 
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data

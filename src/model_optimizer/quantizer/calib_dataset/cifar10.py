@@ -23,6 +23,7 @@ class Cifar10Dataset(DatasetBase):
         self.dataset_fn = tf.data.TFRecordDataset
 
     # pylint: disable=R0201
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data
