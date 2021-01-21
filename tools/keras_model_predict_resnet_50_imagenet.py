@@ -18,4 +18,4 @@ if __name__ == "__main__":
         "batch_size_val": 64
     }
     model_path = os.path.join(base_dir, '../examples/models_eval_ckpt/resnet_50_imagenet_pruned/checkpoint-120.h5')
-    keras_model_predict(request, model_path)
+    keras_model_predict(request, model_path, True)

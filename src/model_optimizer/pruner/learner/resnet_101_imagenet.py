@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Lenet on mnist Learner definition
+Resnet-101 on imagenet Learner definition
 """
 import os
 import tensorflow as tf
@@ -12,7 +12,7 @@ from .learner_base import LearnerBase
 
 class Learner(LearnerBase):
     """
-    Lenet on mnist Learner
+    Resnet-101 on imagenet Learner
     """
     def __init__(self, config):
         super().__init__(config)
@@ -26,6 +26,15 @@ class Learner(LearnerBase):
             # Note: This callback must be in the list before the ReduceLROnPlateau,
             # TensorBoard or other metrics-based callbacks.
             hvd.callbacks.MetricAverageCallback(),
+            # Horovod: using `lr = 1.0 * hvd.size()` from the very beginning leads to worse final
+            # accuracy. Scale the learning rate `lr = 1.0` ---> `lr = 1.0 * hvd.size()` during
+            # the first five epochs. See https://arxiv.org/abs/1706.02677 for details.
+            hvd.callbacks.LearningRateWarmupCallback(warmup_epochs=5, verbose=0),
+            # Horovod: after the warmup reduce learning rate by 10 on the 30th, 60th and 90th epochs.
+            hvd.callbacks.LearningRateScheduleCallback(start_epoch=5, end_epoch=30, multiplier=1.),
+            hvd.callbacks.LearningRateScheduleCallback(start_epoch=30, end_epoch=60, multiplier=1e-1),
+            hvd.callbacks.LearningRateScheduleCallback(start_epoch=60, end_epoch=90, multiplier=1e-2),
+            hvd.callbacks.LearningRateScheduleCallback(start_epoch=90, multiplier=1e-3),
         ]
         # Horovod: save checkpoints only on worker 0 to prevent other workers from corrupting them.
         if hvd.rank() == 0:
@@ -38,22 +47,30 @@ class Learner(LearnerBase):
         Model compile optimizer
         :return: Return model compile optimizer
         """
-        opt = tf.optimizers.Adam(self.learning_rate*hvd.size())
+        opt = tf.keras.optimizers.SGD(learning_rate=self.learning_rate*hvd.size(), momentum=0.9)
         opt = hvd.DistributedOptimizer(opt)
         return opt
 
     def get_losses(self, is_training=True):
         """
         Model compile losses
-        :param is_training: is training or not
+        :param: is_training: is training of not
         :return: Return model compile losses
         """
-        return 'sparse_categorical_crossentropy'
+        softmax_loss = tf.keras.losses.SparseCategoricalCrossentropy()
+        logits_loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        if self.config.get_attribute('scheduler') == 'distill' and is_training:
+            return None
+        else:
+            if self.config.get_attribute("classifier_activation", "softmax") == "softmax":
+                return [softmax_loss, None]
+            else:
+                return [None, logits_loss]
 
     def get_metrics(self, is_training=True):
         """
         Model compile metrics
-        :param is_training: is training or not
+        :param: is_training: is training of not
         :return: Return model compile metrics
         """
         if self.config.get_attribute('scheduler') == 'distill' and is_training:

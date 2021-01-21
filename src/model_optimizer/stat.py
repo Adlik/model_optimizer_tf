@@ -8,6 +8,7 @@ import tensorflow as tf
 import numpy as np
 
 
+# pylint: disable=not-context-manager
 def get_keras_model_flops(model_h5_path):
     """
     Get keras model FLOPs

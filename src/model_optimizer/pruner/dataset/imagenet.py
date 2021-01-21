@@ -21,7 +21,7 @@ class ImagenetDataset(DatasetBase):
         :param is_training: whether to construct the training subset
         :return:
         """
-        super(ImagenetDataset, self).__init__(config, is_training, num_shards, shard_index)
+        super().__init__(config, is_training, num_shards, shard_index)
         if is_training:
             self.file_pattern = os.path.join(self.data_dir, 'train-*-of-*')
             self.batch_size = self.batch_size
@@ -33,6 +33,7 @@ class ImagenetDataset(DatasetBase):
         self.num_samples_of_train = 1281167
         self.num_samples_of_val = 50000
 
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data
@@ -77,3 +78,14 @@ class ImagenetDataset(DatasetBase):
             num_channels=3,
             is_training=self.is_training)
         return image, label
+
+    def parse_fn_distill(self, example_serialized):
+        """
+        Parse features from the serialized data for distillation
+        :param example_serialized: serialized data
+        :return: {image, label},{}
+        """
+        image, label = self.parse_fn(example_serialized)
+        inputs = {"image": image, "label": label}
+        targets = {}
+        return inputs, targets

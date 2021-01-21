@@ -13,7 +13,7 @@ _VERSION = '0.0.0'
 
 _REQUIRED_PACKAGES = [
     'requests',
-    'tensorflow==2.1.0',
+    'tensorflow==2.3.0',
     'jsonschema==3.1.1',
     'networkx==2.4',
     'mpi4py==3.0.3',
@@ -43,7 +43,7 @@ def get_dist(pkgname):
 
 
 if get_dist('tensorflow') is None and get_dist('tensorflow-gpu') is not None:
-    _REQUIRED_PACKAGES.remove('tensorflow==2.1.0')
+    _REQUIRED_PACKAGES.remove('tensorflow==2.3.0')
 
 setup(
     name="model_optimizer",
@@ -60,7 +60,8 @@ setup(
     package_data={
         'model_optimizer': ['**/*.json',
                             'pruner/scheduler/uniform_auto/*.yaml',
-                            'pruner/scheduler/uniform_specified_layer/*.yaml']
+                            'pruner/scheduler/uniform_specified_layer/*.yaml',
+                            'pruner/scheduler/distill/*.yaml']
     },
 
 )

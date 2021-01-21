@@ -38,11 +38,12 @@ def _get_from_saved_model(graph_func, input_data, print_result=False):
     return output_data
 
 
-def keras_model_predict(request, file_path):
+def keras_model_predict(request, file_path, is_multi_output=False):
     """
     Keras model predict
     :param request: dict, must match pruner config_schema.json
     :param file_path: file path
+    :param is_multi_output: the flag of multiple output of the model
     :return:
     """
     ds_val = get_dataset(prune_conf_from_obj(request), is_training=False)
@@ -53,7 +54,10 @@ def keras_model_predict(request, file_path):
     cur_steps = 0
     start = time.time()
     for x_test, y_test in val_dataset:
-        result = keras_model.predict(x_test)
+        if is_multi_output:
+            result, _ = keras_model.predict(x_test)
+        else:
+            result = keras_model.predict(x_test)
         output_data = tf.keras.backend.argmax(result)
         for j in range(y_test.shape[0]):
             if int(output_data[j]) == int(y_test[j]):

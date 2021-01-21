@@ -16,7 +16,7 @@ class Learner(LearnerBase):
     Resnet-50 on imagenet Learner
     """
     def __init__(self, config):
-        super(Learner, self).__init__(config)
+        super().__init__(config)
         self.callbacks = [
             # Horovod: broadcast initial variable states from rank 0 to all other processes.
             # This is necessary to ensure consistent initialization of all workers when
@@ -51,16 +51,20 @@ class Learner(LearnerBase):
         opt = hvd.DistributedOptimizer(opt)
         return opt
 
-    def get_losses(self):
+    def get_losses(self, is_training=True):
         """
         Model compile losses
+        :param is_training: is training or not
         :return: Return model compile losses
         """
         return 'sparse_categorical_crossentropy'
 
-    def get_metrics(self):
+    def get_metrics(self, is_training=True):
         """
         Model compile metrics
+        :param is_training: is training or not
         :return: Return model compile metrics
         """
+        if self.config.get_attribute('scheduler') == 'distill' and is_training:
+            return None
         return ['sparse_categorical_accuracy']

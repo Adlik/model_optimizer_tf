@@ -61,30 +61,32 @@ def mobilenet_v2_0_75(num_classes=1001,
     return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=0.75)
 
 
-def mobilenet_v2_1(num_classes=1001,
+def mobilenet_v2_1(name, num_classes=1001,
                    dropout_prob=1e-3,
                    is_training=True):
     """
     Build mobilenet_v2_1.0 model
+    :param name: the model name
     :param num_classes:
     :param dropout_prob:
     :param is_training:
     :return:
     """
-    return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=1.0)
+    return _mobilenet_v2(name, num_classes, dropout_prob, is_training, scale=1.0)
 
 
-def mobilenet_v2_1_3(num_classes=1001,
+def mobilenet_v2_1_3(name, num_classes=1001,
                      dropout_prob=1e-3,
                      is_training=True):
     """
     Build mobilenet_v2_1.3 model
+    :param name: the model name
     :param num_classes:
     :param dropout_prob:
     :param is_training:
     :return:
     """
-    return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=1.3)
+    return _mobilenet_v2(name, num_classes, dropout_prob, is_training, scale=1.3)
 
 
 def mobilenet_v2_1_4(num_classes=1001,
@@ -100,12 +102,13 @@ def mobilenet_v2_1_4(num_classes=1001,
     return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=1.4)
 
 
-def _mobilenet_v2(num_classes=1001,
+def _mobilenet_v2(name, num_classes=1001,
                   dropout_prob=1e-3,
                   is_training=True,
                   scale=1.0):
     """
     Build mobilenet_v2 model
+    :param name: the model name
     :param num_classes:
     :param dropout_prob:
     :param is_training:
@@ -193,7 +196,7 @@ def _mobilenet_v2(num_classes=1001,
                                name='conv_preds')(x)
     x = tf.keras.layers.Reshape((num_classes,), name='reshape_2')(x)
     outputs = tf.keras.layers.Activation('softmax', name='act_softmax')(x)
-    model = tf.keras.Model(inputs, outputs)
+    model = tf.keras.Model(inputs, outputs, name=name)
     return model
 
 

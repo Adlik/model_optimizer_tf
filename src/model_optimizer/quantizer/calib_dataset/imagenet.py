@@ -20,10 +20,11 @@ class ImagenetDataset(DatasetBase):
         :param data_path: tfrecord data path
         :return:
         """
-        super(ImagenetDataset, self).__init__(data_path)
+        super().__init__(data_path)
         self.dataset_fn = tf.data.TFRecordDataset
 
     # pylint: disable=R0201
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     def parse_fn(self, example_serialized):
         """
         Parse features from the serialized data
