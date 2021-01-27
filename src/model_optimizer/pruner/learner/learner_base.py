@@ -13,6 +13,7 @@ from ..models import get_model
 from .utils import get_call_backs
 from ...stat import print_keras_model_summary, print_keras_model_params_flops
 from ..distill.distill_loss import DistillLossLayer
+from ..core.pruner import dense_present_before_conv
 
 
 class LearnerBase(metaclass=abc.ABCMeta):
@@ -253,6 +254,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
                 custom_objects=custom_objects)
             self.train_models_update(model)
 
+    # pylint: disable=too-many-branches
     def save_eval_model(self):
         """
         Save evaluate model
@@ -262,6 +264,8 @@ class LearnerBase(metaclass=abc.ABCMeta):
             return
         train_model = self.models_train[-1]
         eval_model = self.models_eval[-1]
+        channel = -1
+        conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(train_model)
         save_model_path = os.path.join(self.save_model_path, 'checkpoint-') + str(self.cur_epoch) + '.h5'
         if self.config.get_attribute('scheduler') == 'distill':
             model_name = self.config.get_attribute('model_name')
@@ -276,8 +280,25 @@ class LearnerBase(metaclass=abc.ABCMeta):
         else:
             clone_model = tf.keras.models.clone_model(eval_model)
             for i, layer in enumerate(clone_model.layers):
+                layer_type = str(type(layer))
+                # the model's output with convolution, no pruning and getting its channel
+                if not dense_ahead_of_conv and i == conv_index:
+                    if layer_type.endswith('Conv2D\'>'):
+                        channel = train_model.get_layer(layer.name).filters
+                    continue
+                # incoperate with the change of channel resulting from pruing filters in convolution
+                if layer_type.endswith('Reshape\'>'):
+                    if i == last_reshape:
+                        target_shape = (channel,)
+                        clone_model.layers[i].target_shape = target_shape
+                        continue
+                    elif channel != -1:
+                        target_shape = (1, 1, channel)
+                        clone_model.layers[i].target_shape = target_shape
+                        continue
                 if 'Conv2D' in str(type(layer)):
                     clone_model.layers[i].filters = train_model.get_layer(layer.name).filters
+                    channel = train_model.get_layer(layer.name).filters
                 elif 'Dense' in str(type(layer)):
                     clone_model.layers[i].units = train_model.get_layer(layer.name).units
             pruned_eval_model = tf.keras.models.model_from_json(clone_model.to_json())

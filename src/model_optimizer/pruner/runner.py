@@ -46,8 +46,7 @@ def run_scheduler(config):
         learner.train(initial_epoch=initial_epoch, epochs=cur_epoch+epoch_span, lr_schedulers=lr_schedulers)
         cur_epoch += epoch_span
         _prune(config, cur_epoch, learner)
-    if cur_epoch < ln_cur_epoch:
-        cur_epoch = ln_cur_epoch
+    cur_epoch = max(cur_epoch, ln_cur_epoch)
     target_epoch = config.get_attribute('epochs')
     if cur_epoch < target_epoch:
         learner.build_train()

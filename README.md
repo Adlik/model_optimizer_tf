@@ -36,6 +36,15 @@ The following table is the size of the above model files:
 | LeNet-5   | 1176KB       | 499KB(59% pruned)  | 120KB                 | 1154KB (pb)          |
 | ResNet-50 | 99MB         | 67MB(31.9% pruned) | 18MB                  | 138MB(pb)            |
 
+Currently, the MobileNet-v1 model was only pruned but not quantized. We show the results of different pruning ratio,
+which was tested on ImageNet. The original test accuracy is 71.25%, and model size is 17MB.
+
+| Pruning ratio(%) | FLOPs(%) | Params(%) | Test Accuracy(%) | Size(MB)     |
+| ---------------- | -------- | --------- | ---------------- | ------------ |
+| 25               | -33.12   | -38.37    | 69.658           | 11(-35.29%)  |
+| 35               | -51.32   | -51.41    | 68.66            | 8.2(-51.76%) |
+| 50               | -57.21   | -67.69    | 66.87            | 5.5(-67.65%) |
+
 Knowledge distillation is an effective way to imporve the performance of model.
 
 The following table  shows the distillation result of  ResNet-50 as the student network where ResNet-101 as the teacher network.

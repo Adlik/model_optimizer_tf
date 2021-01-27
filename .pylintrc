@@ -11,7 +11,8 @@ disable = fixme,
           no-member,
           unnecessary-pass,
           import-outside-toplevel,
-          no-else-continue
+          no-else-continue,
+          similarities
 
 [FORMAT]
 max-line-length = 120

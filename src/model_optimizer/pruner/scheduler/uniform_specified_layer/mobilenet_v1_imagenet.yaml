@@ -1,0 +1,52 @@
+version: 1
+pruners:
+  prune_func1:
+    criterion: mean_l1_norm
+    prune_type: specified_layer_prune
+    ratio: 0.35
+    layers_to_be_pruned: [
+        conv_pw_1,
+        conv_pw_2,
+        conv_pw_4,
+        conv_pw_5,
+        conv_pw_6,
+        conv_pw_7,
+        conv_pw_8,
+        conv_pw_9,
+        conv_pw_10,
+        conv_pw_11,
+        conv_pw_12,
+        conv_pw_13
+    ]
+
+lr_schedulers:
+  # Learning rate
+  - name: warmup_lr
+    class: LearningRateWarmupCallback
+    warmup_epochs: 5
+    verbose: 0
+  - name: lr_multiply_1
+    class: LearningRateScheduleCallback
+    start_epoch: 5
+    end_epoch: 30
+    multiplier: 1.0
+  - name: lr_multiply_0.1
+    class: LearningRateScheduleCallback
+    start_epoch: 30
+    end_epoch: 50
+    multiplier: 1e-1
+  - name: lr_multiply_0.01
+    class: LearningRateScheduleCallback
+    start_epoch: 50
+    end_epoch: 70
+    multiplier: 1e-2
+  - name: lr_multiply_0.001
+    class: LearningRateScheduleCallback
+    start_epoch: 70
+    end_epoch : 90
+    multiplier: 1e-3
+
+prune_schedulers:
+  - pruner:
+      func_name: prune_func1
+    epochs: [5]

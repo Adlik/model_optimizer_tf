@@ -1,0 +1,44 @@
+version: 1
+pruners:
+  prune_func1:
+    criterion: l1_norm
+    prune_type: auto_prune
+    ratio: 0.30
+
+lr_schedulers:
+  # Learning rate
+  - name: warmup_lr
+    class: LearningRateWarmupCallback
+    warmup_epochs: 5
+    verbose: 0
+  - name: lr_multiply_1
+    class: LearningRateScheduleCallback
+    start_epoch: 5
+    end_epoch: 30
+    multiplier: 1.0
+  - name: lr_multiply_0.1
+    class: LearningRateScheduleCallback
+    start_epoch: 30
+    end_epoch: 80
+    multiplier: 1e-1
+  - name: lr_multiply_0.01
+    class: LearningRateScheduleCallback
+    start_epoch: 80
+    end_epoch: 120
+    multiplier: 1e-2
+  - name: lr_multiply_0.001
+    class: LearningRateScheduleCallback
+    start_epoch: 120
+    end_epoch: 140
+    multiplier: 1e-3
+  - name: lr_multiply_0.0001
+    class: LearningRateScheduleCallback
+    start_epoch: 140
+    end_epoch: 200
+    multiplier: 1e-4
+
+prune_schedulers:
+  - pruner:
+      func_name: prune_func1
+    epochs: [50]
+
