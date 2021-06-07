@@ -16,14 +16,13 @@ def compress_dir(source_list, zip_file_path):
     :param zip_file_path: path of zip file
     :return:
     """
-    zip_file = zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED)
-    for source in source_list:
-        basename = os.path.basename(source)
-        zip_file.write(source, basename)
-        if os.path.isdir(source):
-            for path, _, filenames in os.walk(source):
-                fpath = path.replace(source, basename)
-                for filename in filenames:
-                    zip_file.write(os.path.join(path, filename), os.path.join(fpath, filename))
-    zip_file.close()
+    with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for source in source_list:
+            basename = os.path.basename(source)
+            zip_file.write(source, basename)
+            if os.path.isdir(source):
+                for path, _, filenames in os.walk(source):
+                    fpath = path.replace(source, basename)
+                    for filename in filenames:
+                        zip_file.write(os.path.join(path, filename), os.path.join(fpath, filename))
     return zip_file_path

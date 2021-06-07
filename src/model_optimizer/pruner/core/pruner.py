@@ -30,6 +30,45 @@ def get_network(model):
     return digraph
 
 
+def dense_present_before_conv(orig_model):
+    """
+    Determin whether to use a fully connected layer or a reshape layer for model classification.
+    :orig_model: keras model
+    :return:
+        - layer_index: convolution or dense layer index
+        - last_reshape: the last reshape layer index
+        - Boolean: the model whether ending with dense layer
+    """
+    layer_name = []
+    dense_present = False
+    conv_present = False
+    last_reshape = -1
+    conv_dense_present = False
+    layer_index = -1
+    for _, layer in enumerate(orig_model.layers):
+        layer_name.append(str(type(layer)))
+    length = len(layer_name)
+    for index in range(length - 1, -1, -1):
+        if not conv_dense_present and 'Reshape' in layer_name[index]:
+            last_reshape = index
+        if 'Conv2D' in layer_name[index] and not conv_dense_present:
+            conv_present = True
+            conv_dense_present = True
+            layer_index = index
+            break
+        if 'Dense' in layer_name[index] and not conv_dense_present:
+            dense_present = True
+            conv_dense_present = True
+            layer_index = index
+            break
+    if dense_present and not conv_present:
+        return layer_index, last_reshape, True
+    elif conv_present and not dense_present:
+        return layer_index, last_reshape, False
+    else:
+        return -1, -1, False
+
+
 def _get_sorted_mask(arr, num_retain_channels):
     arg_sort = np.argsort(-arr)
     mask_arr = np.zeros(arr.shape[-1], dtype=bool)
@@ -134,7 +173,10 @@ def _layer_set_weights(pruned_model, layer, weights_0, idx, mask_dict):
                 pruned_model.layers[idx].set_weights([weights_0[:, :, :, mask_dict[idx]],
                                                       layer.weights[1].numpy()[mask_dict[idx]]])
             else:
-                pruned_model.layers[idx].set_weights([weights_0[:, :, :, mask_dict[idx]]])
+                if layer_type.endswith('DepthwiseConv2D\'>'):
+                    pruned_model.layers[idx].set_weights(weights_0[:, :, mask_dict[idx], :])
+                else:
+                    pruned_model.layers[idx].set_weights([weights_0[:, :, :, mask_dict[idx]]])
         else:
             if layer.use_bias:
                 pruned_model.layers[idx].set_weights([weights_0[:, mask_dict[idx]],
@@ -198,12 +240,29 @@ def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion=
     clone_model = tf.keras.models.clone_model(cur_model)
     digraph = get_network(cur_model)
     mask_dict = {}
+    conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(orig_model)
+    channel = -1
     for i, layer in enumerate(cur_model.layers):
+        layer_type = str(type(layer))
+        if not dense_ahead_of_conv and i == conv_index:
+            if layer_type.endswith('Conv2D\'>'):
+                channel = clone_model.get_layer(layer.name).filters
+            continue
+        if layer_type.endswith('Reshape\'>'):
+            if i == last_reshape:
+                target_shape = (channel,)
+                clone_model.layers[i].target_shape = target_shape
+                continue
+            elif channel != -1:
+                target_shape = (1, 1, channel)
+                clone_model.layers[i].target_shape = target_shape
+                continue
         if 'Conv2D' in str(type(layer)):
             if layer.name in layers_name:
                 clone_model.layers[i].filters = \
                     clone_model.layers[i].filters - int(orig_model.layers[i].filters * ratio)
                 mask_dict[i] = _get_conv_mask(cur_model, i, digraph, int(clone_model.layers[i].filters), criterion)
+                channel = clone_model.layers[i].filters
         elif 'Dense' in str(type(layer)):
             if i == len(cur_model.layers) - 1:
                 continue
@@ -229,11 +288,28 @@ def auto_prune(orig_model, cur_model, ratio, criterion='l1_norm'):
     clone_model = tf.keras.models.clone_model(cur_model)
     digraph = get_network(cur_model)
     mask_dict = {}
+    conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(orig_model)
+    channel = -1
     for i, layer in enumerate(cur_model.layers):
+        layer_type = str(type(layer))
+        if not dense_ahead_of_conv and i == conv_index:
+            if layer_type.endswith('Conv2D\'>'):
+                channel = clone_model.get_layer(layer.name).filters
+            continue
+        if layer_type.endswith('Reshape\'>'):
+            if i == last_reshape:
+                target_shape = (channel,)
+                clone_model.layers[i].target_shape = target_shape
+                continue
+            elif channel != -1:
+                target_shape = (1, 1, channel)
+                clone_model.layers[i].target_shape = target_shape
+                continue
         if 'Conv2D' in str(type(layer)):
             clone_model.layers[i].filters = \
                 clone_model.layers[i].filters - int(orig_model.layers[i].filters * ratio)
             mask_dict[i] = _get_conv_mask(cur_model, i, digraph, int(clone_model.layers[i].filters), criterion)
+            channel = clone_model.layers[i].filters
         elif 'Dense' in str(type(layer)):
             if i == len(cur_model.layers) - 1:
                 continue
