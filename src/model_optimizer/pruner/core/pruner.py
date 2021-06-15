@@ -7,6 +7,12 @@ Pruner class define and function related
 import networkx as nx
 import tensorflow as tf
 import numpy as np
+from ..distill.distill_loss import DistillLossLayer
+
+
+_custom_objects = {
+        'DistillLossLayer': DistillLossLayer
+    }
 
 
 def get_network(model):
@@ -84,6 +90,7 @@ def _get_dense_mask(model, layer_id, digraph, num_retain_channels, criterion):
     return _get_layer_mask(model, layer_id, 'dense', digraph, num_retain_channels, criterion)
 
 
+# pylint: disable=too-many-arguments
 def _get_layer_mask(model, layer_id, layer_type, digraph, num_retain_channels, criterion):
     """
     Get conv2d layer mask
@@ -138,7 +145,13 @@ def get_relate_father_id(layer_id, digraph):
                'AveragePooling2D',
                'BatchNormalization',
                'Flatten',
-               'MaxPooling2D']
+               'MaxPooling2D',
+               'DepthwiseConv2D',
+               'ReLU',
+               'Reshape',
+               'Dropout',
+               'GlobalAveragePooling2D',
+               'ZeroPadding2D']
     node_list = []
     for node in digraph.predecessors(layer_id):
         node_list.append(node)
@@ -202,6 +215,8 @@ def update_weights(model, pruned_model, digraph, mask_dict):
     """
     for i, layer in enumerate(model.layers):
         layer_type = str(type(layer))
+        if 'DepthwiseConv2D' in str(type(layer)):
+            continue
         if layer_type.endswith('Conv2D\'>') or layer_type.endswith('Dense\'>') or \
                 layer_type.endswith('BatchNormalization\'>'):
             new_model_layer_input_shape = pruned_model.layers[i].input.shape
@@ -227,7 +242,8 @@ def update_weights(model, pruned_model, digraph, mask_dict):
             _layer_set_weights(pruned_model, layer, weights_0, i, mask_dict)
 
 
-def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion='l1_norm'):
+# pylint: disable=too-many-arguments,too-many-branches,too-many-statements
+def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion='l1_norm', basic_config=None):
     """
     Prune with specified layers
     :param orig_model: original model, never pruned once
@@ -235,90 +251,142 @@ def specified_layers_prune(orig_model, cur_model, layers_name, ratio, criterion=
     :param layers_name: name list of pruned layers
     :param ratio: ratio of pruned
     :param criterion: 'l1_norm' or 'bn_gamma'
+    :param basic_config: config
     :return: pruned model
     """
     clone_model = tf.keras.models.clone_model(cur_model)
-    digraph = get_network(cur_model)
+    if basic_config is None:
+        is_distill = False
+        model_name = 'no_name'
+    else:
+        is_distill = basic_config.get_attribute('is_distill', False)
+        model_name = basic_config.get_attribute('model_name')
+    if is_distill:
+        _clone_model = clone_model.get_layer(model_name)
+        _cur_model = cur_model.get_layer(model_name)
+        _orig_model = orig_model.get_layer(model_name)
+    else:
+        _clone_model = clone_model
+        _cur_model = cur_model
+        _orig_model = orig_model
+    digraph = get_network(_cur_model)
     mask_dict = {}
-    conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(orig_model)
+    conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(_orig_model)
     channel = -1
-    for i, layer in enumerate(cur_model.layers):
+    for i, layer in enumerate(_cur_model.layers):
         layer_type = str(type(layer))
         if not dense_ahead_of_conv and i == conv_index:
             if layer_type.endswith('Conv2D\'>'):
-                channel = clone_model.get_layer(layer.name).filters
+                channel = _clone_model.get_layer(layer.name).filters
             continue
         if layer_type.endswith('Reshape\'>'):
             if i == last_reshape:
                 target_shape = (channel,)
-                clone_model.layers[i].target_shape = target_shape
+                _clone_model.layers[i].target_shape = target_shape
                 continue
             elif channel != -1:
                 target_shape = (1, 1, channel)
-                clone_model.layers[i].target_shape = target_shape
+                _clone_model.layers[i].target_shape = target_shape
                 continue
         if 'Conv2D' in str(type(layer)):
             if layer.name in layers_name:
-                clone_model.layers[i].filters = \
-                    clone_model.layers[i].filters - int(orig_model.layers[i].filters * ratio)
-                mask_dict[i] = _get_conv_mask(cur_model, i, digraph, int(clone_model.layers[i].filters), criterion)
-                channel = clone_model.layers[i].filters
+                _clone_model.layers[i].filters = \
+                    _clone_model.layers[i].filters - int(_orig_model.layers[i].filters * ratio)
+                mask_dict[i] = _get_conv_mask(_cur_model, i, digraph, int(_clone_model.layers[i].filters), criterion)
+                channel = _clone_model.layers[i].filters
         elif 'Dense' in str(type(layer)):
-            if i == len(cur_model.layers) - 1:
+            if i == len(_cur_model.layers) - 1:
                 continue
             else:
                 if layer.name in layers_name:
-                    clone_model.layers[i].units = \
-                        clone_model.layers[i].units - int(orig_model.layers[i].units * ratio)
-                    mask_dict[i] = _get_dense_mask(cur_model, i, digraph, int(clone_model.layers[i].units), criterion)
-    pruned_model = tf.keras.models.model_from_json(clone_model.to_json())
-    update_weights(cur_model, pruned_model, digraph, mask_dict)
+                    _clone_model.layers[i].units = \
+                        _clone_model.layers[i].units - int(_orig_model.layers[i].units * ratio)
+                    mask_dict[i] = _get_dense_mask(_cur_model, i, digraph, int(_clone_model.layers[i].units), criterion)
+    if is_distill:
+        custom_objects = _custom_objects
+    else:
+        custom_objects = None
+    pruned_model = tf.keras.models.model_from_json(clone_model.to_json(), custom_objects=custom_objects)
+    if not is_distill:
+        update_weights(cur_model, pruned_model, digraph, mask_dict)
     return pruned_model
 
 
-def auto_prune(orig_model, cur_model, ratio, criterion='l1_norm'):
+# pylint: disable=too-many-arguments,too-many-branches,too-many-statements
+def auto_prune(orig_model, cur_model, ratio, criterion='l1_norm', basic_config=None):
     """
     Auto prune layer with fixed ratio
     :param orig_model: original model, never pruned once
     :param cur_model: model before this step of pruned
     :param ratio: ratio of pruned
     :param criterion: 'l1_norm' or 'bn_gamma'
+    :param basic_config: config
     :return: pruned model
     """
     clone_model = tf.keras.models.clone_model(cur_model)
-    digraph = get_network(cur_model)
+    if basic_config is None:
+        is_distill = False
+        model_name = 'no_name'
+    else:
+        is_distill = basic_config.get_attribute('is_distill', False)
+        model_name = basic_config.get_attribute('model_name')
+    if is_distill:
+        _clone_model = clone_model.get_layer(model_name)
+        _cur_model = cur_model.get_layer(model_name)
+        _orig_model = orig_model.get_layer(model_name)
+    else:
+        _clone_model = clone_model
+        _cur_model = cur_model
+        _orig_model = orig_model
+    digraph = get_network(_cur_model)
     mask_dict = {}
-    conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(orig_model)
+    conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(_orig_model)
     channel = -1
-    for i, layer in enumerate(cur_model.layers):
+    last_dense_or_conv = True
+    for i, layer in enumerate(_cur_model.layers):
         layer_type = str(type(layer))
         if not dense_ahead_of_conv and i == conv_index:
             if layer_type.endswith('Conv2D\'>'):
-                channel = clone_model.get_layer(layer.name).filters
+                channel = _clone_model.get_layer(layer.name).filters
             continue
         if layer_type.endswith('Reshape\'>'):
             if i == last_reshape:
                 target_shape = (channel,)
-                clone_model.layers[i].target_shape = target_shape
+                _clone_model.layers[i].target_shape = target_shape
                 continue
             elif channel != -1:
                 target_shape = (1, 1, channel)
-                clone_model.layers[i].target_shape = target_shape
+                _clone_model.layers[i].target_shape = target_shape
                 continue
-        if 'Conv2D' in str(type(layer)):
-            clone_model.layers[i].filters = \
-                clone_model.layers[i].filters - int(orig_model.layers[i].filters * ratio)
-            mask_dict[i] = _get_conv_mask(cur_model, i, digraph, int(clone_model.layers[i].filters), criterion)
-            channel = clone_model.layers[i].filters
+        if 'DepthwiseConv2D' in str(type(layer)):
+            continue
+        elif 'Conv2D' in str(type(layer)):
+            _clone_model.layers[i].filters = \
+                _clone_model.layers[i].filters - int(_orig_model.layers[i].filters * ratio)
+            mask_dict[i] = _get_conv_mask(_cur_model, i, digraph, int(_clone_model.layers[i].filters), criterion)
+            channel = _clone_model.layers[i].filters
         elif 'Dense' in str(type(layer)):
-            if i == len(cur_model.layers) - 1:
+            if i == len(_cur_model.layers) - 1:
                 continue
             else:
-                clone_model.layers[i].units = \
-                    clone_model.layers[i].units - int(orig_model.layers[i].units * ratio)
-                mask_dict[i] = _get_dense_mask(cur_model, i, digraph, int(clone_model.layers[i].units), criterion)
-    pruned_model = tf.keras.models.model_from_json(clone_model.to_json())
-    update_weights(cur_model, pruned_model, digraph, mask_dict)
+
+                for index in range(i+1, len(_cur_model.layers)):
+                    if 'Dense' in str(type(_cur_model.layers[index])) or \
+                            'Conv2D' in str(type(_cur_model.layers[index])):
+                        last_dense_or_conv = False
+                        break
+                if not last_dense_or_conv:
+                    _clone_model.layers[i].units = \
+                        _clone_model.layers[i].units - int(_orig_model.layers[i].units * ratio)
+                    mask_dict[i] = _get_dense_mask(_cur_model, i, digraph,
+                                                   int(_clone_model.layers[i].units), criterion)
+    if is_distill:
+        custom_objects = _custom_objects
+    else:
+        custom_objects = None
+    pruned_model = tf.keras.models.model_from_json(clone_model.to_json(), custom_objects=custom_objects)
+    if not is_distill:
+        update_weights(cur_model, pruned_model, digraph, mask_dict)
     return pruned_model
 
 
@@ -327,9 +395,10 @@ class AutoPruner:
     Auto select layers to prune.
     """
 
-    def __init__(self, config):
-        self.ratio = config['ratio']
-        self.criterion = config['criterion']
+    def __init__(self, scheduler_config, basic_config=None):
+        self.basic_config = basic_config
+        self.ratio = scheduler_config['ratio']
+        self.criterion = scheduler_config['criterion']
 
     def prune(self, orig_model, cur_model):
         """
@@ -338,7 +407,7 @@ class AutoPruner:
         :param cur_model: model before this step of pruned
         :return: pruned model
         """
-        return auto_prune(orig_model, cur_model, self.ratio, self.criterion)
+        return auto_prune(orig_model, cur_model, self.ratio, self.criterion, self.basic_config)
 
 
 class SpecifiedLayersPruner:
@@ -346,10 +415,11 @@ class SpecifiedLayersPruner:
     Specified layers to prune.
     """
 
-    def __init__(self, config):
-        self.ratio = config['ratio']
-        self.criterion = config['criterion']
-        self.layers_name = config['layers_to_be_pruned']
+    def __init__(self, scheduler_config, basic_config=None):
+        self.basic_config = basic_config
+        self.ratio = scheduler_config['ratio']
+        self.criterion = scheduler_config['criterion']
+        self.layers_name = scheduler_config['layers_to_be_pruned']
 
     def prune(self, orig_model, cur_model):
         """
@@ -358,4 +428,5 @@ class SpecifiedLayersPruner:
         :param cur_model: model before this step of pruned
         :return: pruned model
         """
-        return specified_layers_prune(orig_model, cur_model, self.layers_name, self.ratio, self.criterion)
+        return specified_layers_prune(orig_model, cur_model,
+                                      self.layers_name, self.ratio, self.criterion, self.basic_config)

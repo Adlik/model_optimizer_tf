@@ -5,62 +5,68 @@
 VGG models
 """
 import tensorflow as tf
+from .config import ModelConfig
 
-L2_WEIGHT_DECAY = 1e-4
-BATCH_NORM_DECAY = 0.9
-BATCH_NORM_EPSILON = 1e-5
+_config = ModelConfig(l2_weight_decay=1e-4, batch_norm_decay=0.9, batch_norm_epsilon=1e-5)
+L2_WEIGHT_DECAY = _config.l2_weight_decay
+BATCH_NORM_DECAY = _config.batch_norm_decay
+BATCH_NORM_EPSILON = _config.batch_norm_epsilon
 
 
-def vgg_16(is_training, name, num_classes=1001, use_l2_regularizer=True):
+def vgg_16(is_training, name, num_classes=1001, use_l2_regularizer=True, classifier_activation='softmax'):
     """
     VGG-16 model
     :param is_training: if training or not
     :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     return vgg(ver='D', is_training=is_training, name=name, num_classes=num_classes,
-               use_l2_regularizer=use_l2_regularizer)
+               use_l2_regularizer=use_l2_regularizer, classifier_activation=classifier_activation)
 
 
-def vgg_19(is_training, name, num_classes=1001, use_l2_regularizer=True):
+def vgg_19(is_training, name, num_classes=1001, use_l2_regularizer=True, classifier_activation='softmax'):
     """
     VGG-19 model
     :param is_training: if training or not
     :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     return vgg(ver='E', is_training=is_training, name=name, num_classes=num_classes,
-               use_l2_regularizer=use_l2_regularizer)
+               use_l2_regularizer=use_l2_regularizer, classifier_activation=classifier_activation)
 
 
-def vgg_m_16(is_training, name, num_classes=10, use_l2_regularizer=True):
+def vgg_m_16(is_training, name, num_classes=10, use_l2_regularizer=True, classifier_activation='softmax'):
     """
     VGG-M-16 model
     :param is_training: if training or not
     :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     return vgg_m(ver='D', is_training=is_training, name=name, num_classes=num_classes,
-                 use_l2_regularizer=use_l2_regularizer)
+                 use_l2_regularizer=use_l2_regularizer, classifier_activation=classifier_activation)
 
 
-def vgg_m_19(is_training, name, num_classes=10, use_l2_regularizer=True):
+def vgg_m_19(is_training, name, num_classes=10, use_l2_regularizer=True, classifier_activation='softmax'):
     """
     VGG-M-19 model
     :param is_training: if training or not
     :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     return vgg_m(ver='E', is_training=is_training, name=name, num_classes=num_classes,
-                 use_l2_regularizer=use_l2_regularizer)
+                 use_l2_regularizer=use_l2_regularizer, classifier_activation=classifier_activation)
 
 
 def _gen_l2_regularizer(use_l2_regularizer=True):
@@ -81,7 +87,7 @@ def _vgg_blocks(block, conv_num, filters, x, is_training, use_l2_regularizer=Tru
     return x
 
 
-def vgg(ver, is_training, name, num_classes=1001, use_l2_regularizer=True):
+def vgg(ver, is_training, name, num_classes=1001, use_l2_regularizer=True, classifier_activation='softmax'):
     """
     VGG models
     :param ver: 'D' or 'E'
@@ -89,6 +95,7 @@ def vgg(ver, is_training, name, num_classes=1001, use_l2_regularizer=True):
     :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     if ver == 'D':
@@ -117,16 +124,21 @@ def vgg(ver, is_training, name, num_classes=1001, use_l2_regularizer=True):
                               kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                               bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                               name='fc2')(x)
-    outputs = tf.keras.layers.Dense(num_classes, activation='softmax',
-                                    kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.01),
-                                    kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-                                    bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-                                    name='fc3')(x)
+
+    logits = tf.keras.layers.Dense(num_classes, activation=None,
+                                   kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.01),
+                                   kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+                                   bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+                                   name='fc3')(x)
+    if classifier_activation == 'softmax':
+        outputs = tf.keras.layers.Softmax()(logits)
+    else:
+        outputs = logits
     model = tf.keras.Model(inputs, outputs, name=name)
     return model
 
 
-def vgg_m(ver, is_training, name, num_classes=10, use_l2_regularizer=True):
+def vgg_m(ver, is_training, name, num_classes=10, use_l2_regularizer=True, classifier_activation='softmax'):
     """
     VGG-M models
     :param ver: 'D' or 'E'
@@ -134,6 +146,7 @@ def vgg_m(ver, is_training, name, num_classes=10, use_l2_regularizer=True):
     :param name: the model name
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2 regularizer or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     if ver == 'D':
@@ -153,10 +166,14 @@ def vgg_m(ver, is_training, name, num_classes=10, use_l2_regularizer=True):
 
     x = tf.keras.layers.Flatten(name='flat1')(x)
 
-    outputs = tf.keras.layers.Dense(num_classes, activation='softmax',
-                                    kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.01),
-                                    kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-                                    bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-                                    name='fc2')(x)
+    logits = tf.keras.layers.Dense(num_classes, activation=None,
+                                   kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.01),
+                                   kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+                                   bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+                                   name='fc2')(x)
+    if classifier_activation == 'softmax':
+        outputs = tf.keras.layers.Softmax()(logits)
+    else:
+        outputs = logits
     model = tf.keras.Model(inputs, outputs, name=name)
     return model

@@ -22,7 +22,8 @@ class DistillLossLayer(tf.keras.layers.Layer):
     Call arguments:
       inputs: inputs of the layer. It corresponds to [input, y_true, y_prediction]
     """
-    def __init__(self, teacher_path, alpha=1.0, temperature=10, name="DistillLoss", **kwargs):
+    def __init__(self, teacher_path, alpha=1.0, temperature=10, name="DistillLoss",
+                 teacher_model_load_func=None, **kwargs):
         """
         :param teacher_path: the model path of teacher. The format of the  model is h5.
         :param alpha: a float between [0.0, 1.0]. It corresponds to the importance between the student loss and the
@@ -35,7 +36,12 @@ class DistillLossLayer(tf.keras.layers.Layer):
         self.temperature = temperature
         self.teacher_path = teacher_path
         self.accuracy_fn = tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")
-        self.teacher = tf.keras.models.load_model(self.teacher_path)
+        self.teacher_model_load_func = teacher_model_load_func
+        if self.teacher_model_load_func == "load_tf_ensemble_model":
+            from .tf_model_loader import load_tf_ensemble_model
+            self.teacher = load_tf_ensemble_model(self.teacher_path)
+        else:
+            self.teacher = tf.keras.models.load_model(self.teacher_path)
 
     # pylint: disable=unused-argument
     def call(self, inputs, **kwargs):
@@ -72,4 +78,5 @@ class DistillLossLayer(tf.keras.layers.Layer):
         config.update({"teacher_path": self.teacher_path})
         config.update({"alpha": self.alpha})
         config.update({"temperature": self.temperature})
+        config.update({"teacher_model_load_func": self.teacher_model_load_func})
         return config

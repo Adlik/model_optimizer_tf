@@ -12,12 +12,17 @@ from pkg_resources import DistributionNotFound, get_distribution
 _VERSION = '0.0.0'
 
 _REQUIRED_PACKAGES = [
-    'requests',
+    'requests==2.25.0',
     'tensorflow==2.3.0',
     'jsonschema==3.1.1',
     'networkx==2.4',
     'mpi4py==3.0.3',
-    'horovod==0.19.1'
+    'horovod==0.19.1',
+    'tf2cv==0.0.16',
+    'PyYAML==5.3.1',
+    'types-PyYAML',
+    'types-pkg_resources',
+    'types-requests'
 ]
 
 _TEST_REQUIRES = [

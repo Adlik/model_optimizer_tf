@@ -13,7 +13,6 @@ from ..models import get_model
 from .utils import get_call_backs
 from ...stat import print_keras_model_summary, print_keras_model_params_flops
 from ..distill.distill_loss import DistillLossLayer
-from ..core.pruner import dense_present_before_conv
 
 
 class LearnerBase(metaclass=abc.ABCMeta):
@@ -104,7 +103,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         eval_dataset = ds_eval.build()
         train_dataset_distill = None
         eval_dataset_distill = None
-        if self.config.get_attribute("scheduler") == "distill":
+        if self.config.get_attribute("scheduler") == "distill" or self.config.get_attribute('is_distill'):
             ds_train_distill = get_dataset(self.config, is_training=True, num_shards=hvd.size(), shard_index=hvd.rank())
             train_dataset_distill = ds_train_distill.build(True)
             ds_eval_distill = get_dataset(self.config, is_training=False)
@@ -153,7 +152,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
                 self.callbacks.append(tf.keras.callbacks.ModelCheckpoint(os.path.join(self.checkpoint_path,
                                                                                       './checkpoint-{epoch}.h5'),
                                                                          period=self.checkpoint_save_period))
-        if self.config.get_attribute('scheduler') == 'distill':
+        if self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill'):
             train_dataset = self.train_dataset_distill
         else:
             train_dataset = self.train_dataset
@@ -165,8 +164,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         """
         Model eval process, only evaluate on rank 0
         the format of score is like as follows:
-        {loss: 7.6969  dense1_loss: 5.4490  softmax_1_sparse_categorical_accuracy: 0.0665
-        dense1_sparse_categorical_accuracy: 0.0665}
+        {loss: 7.6969  dense1_sparse_categorical_accuracy: 0.0665}
         :return:
         """
         if hvd.rank() != 0:
@@ -174,10 +172,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         eval_model = self.models_eval[-1]
         score = eval_model.evaluate(self.eval_dataset, steps=self.eval_steps_per_epoch)
         loss = score[0]
-        if self.config.get_attribute("classifier_activation", "softmax") == "softmax":
-            accuracy = score[2]
-        else:
-            accuracy = score[3]
+        accuracy = score[1]
 
         print('Test loss:', loss)
         print('Test accuracy:', accuracy)
@@ -236,7 +231,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         _custom_objects = {
             'DistillLossLayer': DistillLossLayer
         }
-        if self.config.get_attribute('scheduler') == 'distill':
+        if self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill'):
             custom_objects = _custom_objects
         else:
             custom_objects = None
@@ -262,49 +257,25 @@ class LearnerBase(metaclass=abc.ABCMeta):
         """
         if hvd.rank() != 0:
             return
-        train_model = self.models_train[-1]
-        eval_model = self.models_eval[-1]
-        channel = -1
-        conv_index, last_reshape, dense_ahead_of_conv = dense_present_before_conv(train_model)
-        save_model_path = os.path.join(self.save_model_path, 'checkpoint-') + str(self.cur_epoch) + '.h5'
-        if self.config.get_attribute('scheduler') == 'distill':
-            model_name = self.config.get_attribute('model_name')
-            for layer_eval in eval_model.layers:
-                for layer in train_model.layers:
-                    if layer.name == model_name and layer_eval.name == model_name:
-                        layer_eval.set_weights(layer.get_weights())
-                        student_eval = layer_eval
-                        break
-            student_eval.save(save_model_path)
-            self.eval_models_update(student_eval)
+        if self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill'):
+            train_model = self.models_train[-1].get_layer(self.config.get_attribute('model_name'))
         else:
-            clone_model = tf.keras.models.clone_model(eval_model)
-            for i, layer in enumerate(clone_model.layers):
-                layer_type = str(type(layer))
-                # the model's output with convolution, no pruning and getting its channel
-                if not dense_ahead_of_conv and i == conv_index:
-                    if layer_type.endswith('Conv2D\'>'):
-                        channel = train_model.get_layer(layer.name).filters
-                    continue
-                # incoperate with the change of channel resulting from pruing filters in convolution
-                if layer_type.endswith('Reshape\'>'):
-                    if i == last_reshape:
-                        target_shape = (channel,)
-                        clone_model.layers[i].target_shape = target_shape
-                        continue
-                    elif channel != -1:
-                        target_shape = (1, 1, channel)
-                        clone_model.layers[i].target_shape = target_shape
-                        continue
-                if 'Conv2D' in str(type(layer)):
-                    clone_model.layers[i].filters = train_model.get_layer(layer.name).filters
-                    channel = train_model.get_layer(layer.name).filters
-                elif 'Dense' in str(type(layer)):
-                    clone_model.layers[i].units = train_model.get_layer(layer.name).units
-            pruned_eval_model = tf.keras.models.model_from_json(clone_model.to_json())
-            pruned_eval_model.set_weights(train_model.get_weights())
-            pruned_eval_model.save(save_model_path)
-            self.eval_models_update(pruned_eval_model)
+            train_model = self.models_train[-1]
+        eval_model = self.models_eval[-1]
+        save_model_path = os.path.join(self.save_model_path, 'checkpoint-') + str(self.cur_epoch) + '.h5'
+        clone_model = tf.keras.models.clone_model(eval_model)
+        for i, layer in enumerate(clone_model.layers):
+            layer_type = str(type(layer))
+            if 'Conv2D' in str(type(layer)):
+                clone_model.layers[i].filters = train_model.get_layer(layer.name).filters
+            elif 'Dense' in str(type(layer)):
+                clone_model.layers[i].units = train_model.get_layer(layer.name).units
+            elif layer_type.endswith('Reshape\'>'):
+                clone_model.layers[i].target_shape = train_model.get_layer(layer.name).target_shape
+        pruned_eval_model = tf.keras.models.model_from_json(clone_model.to_json())
+        pruned_eval_model.set_weights(train_model.get_weights())
+        pruned_eval_model.save(save_model_path)
+        self.eval_models_update(pruned_eval_model)
 
     def print_model_summary(self):
         """

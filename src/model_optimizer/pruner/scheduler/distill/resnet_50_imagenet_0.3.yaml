@@ -1,5 +1,6 @@
 version: 1
-alpha: 0.3
-temperature: 10
-student_name: "resnet_50"
-teacher_path: "/root/work/examples/models_ckpt/resnet_101_imagenet_120e_logits/checkpoint-120.h5"
+distill:
+  alpha: 0.3
+  temperature: 10
+  student_name: "resnet_50"
+  teacher_path: "/root/work/examples/models_ckpt/resnet_101_imagenet_120e_logits/checkpoint-120.h5"

@@ -27,5 +27,5 @@ def get_pruner(config, epoch):
             func_name = scheduler['pruner']['func_name']
             pruner_type = scheduler_config['pruners'][func_name]['prune_type']
             if pruner_type in pruners:
-                pruner_list.append(pruners[pruner_type](scheduler_config['pruners'][func_name]))
+                pruner_list.append(pruners[pruner_type](scheduler_config['pruners'][func_name], config))
     return pruner_list

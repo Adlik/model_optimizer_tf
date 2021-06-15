@@ -9,24 +9,15 @@ import numpy as np
 
 
 # pylint: disable=not-context-manager
-def get_keras_model_flops(model_h5_path):
+def get_keras_model_params_flops(model_h5_path):
     """
     Get keras model FLOPs
     :param model_h5_path: keras model path
-    :return: FLOPs
+    :return: Params, FLOPs
     """
-    session = tf.compat.v1.Session()
-    graph = tf.compat.v1.get_default_graph()
-
-    with graph.as_default():
-        with session.as_default():
-            _ = tf.keras.models.load_model(model_h5_path)
-            run_meta = tf.compat.v1.RunMetadata()
-            opts = tf.compat.v1.profiler.ProfileOptionBuilder.float_operation()
-            flops = tf.compat.v1.profiler.profile(graph=graph,
-                                                  run_meta=run_meta, cmd='op', options=opts)
-    tf.compat.v1.reset_default_graph()
-    return flops.total_float_ops
+    model = tf.keras.models.load_model(model_h5_path)
+    total_params, total_flops = _count_model_params_flops(model)
+    return total_params, total_flops
 
 
 def print_keras_model_summary(model, hvd_rank):

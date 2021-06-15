@@ -30,6 +30,10 @@
     "checkpoint_eval_path": {
       "type": "string",
       "description": "file path of eval checkpoint"
+    },
+    "is_distill":{
+      "type": "boolean",
+      "description": "if start train model with distilling"
     }
   },
   "required": [

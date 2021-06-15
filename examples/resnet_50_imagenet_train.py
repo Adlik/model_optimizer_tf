@@ -28,8 +28,7 @@ def _main():
         "checkpoint_path": os.path.join(base_dir, "./models_ckpt/resnet_50_imagenet"),
         "checkpoint_save_period": 5,  # save a checkpoint every 5 epoch
         "checkpoint_eval_path": os.path.join(base_dir, "./models_eval_ckpt/resnet_50_imagenet"),
-        "scheduler": "train",
-        "classifier_activation": None  # None or "softmax", default is softmax
+        "scheduler": "train"
     }
     prune_model(request)
 
