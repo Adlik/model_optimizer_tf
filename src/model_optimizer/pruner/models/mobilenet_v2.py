@@ -6,12 +6,13 @@ https://arxiv.org/abs/1801.04381  MobileNetV2: Inverted Residuals and Linear Bot
    Adapted from tf.keras.applications.mobilenet.MobileNetV2().
 """
 import tensorflow as tf
+from .config import ModelConfig
 
-
-L2_WEIGHT_DECAY = 0.00004
-STD_DEV = 0.09
-BATCH_NORM_DECAY = 0.99
-BATCH_NORM_EPSILON = 0.001
+_config = ModelConfig(l2_weight_decay=0.00004, batch_norm_decay=0.99, batch_norm_epsilon=0.001, std_dev=0.09)
+L2_WEIGHT_DECAY = _config.l2_weight_decay
+BATCH_NORM_DECAY = _config.batch_norm_decay
+BATCH_NORM_EPSILON = _config.batch_norm_epsilon
+STD_DEV = _config.std_dev
 
 
 def _gen_l2_regularizer(use_l2_regularizer=True):
@@ -22,90 +23,109 @@ def _gen_initializer(use_initializer=True):
     return tf.keras.initializers.TruncatedNormal(stddev=STD_DEV) if use_initializer else None
 
 
-def mobilenet_v2_0_35(num_classes=1001,
+def mobilenet_v2_0_35(num_classes=1000,
                       dropout_prob=1e-3,
-                      is_training=True):
+                      is_training=True,
+                      classifier_activation='softmax'):
     """
     Build mobilenet_v2_0.35 model
     :param num_classes:
     :param dropout_prob:
     :param is_training:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
-    return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=0.35)
+    return _mobilenet_v2(num_classes, dropout_prob, is_training,
+                         scale=0.35, classifier_activation=classifier_activation)
 
 
-def mobilenet_v2_0_5(num_classes=1001,
+def mobilenet_v2_0_5(num_classes=1000,
                      dropout_prob=1e-3,
-                     is_training=True):
+                     is_training=True,
+                     classifier_activation='softmax'):
     """
     Build mobilenet_v2_0.5 model
     :param num_classes:
     :param dropout_prob:
     :param is_training:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
-    return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=0.5)
+    return _mobilenet_v2(num_classes, dropout_prob, is_training,
+                         scale=0.5, classifier_activation=classifier_activation)
 
 
-def mobilenet_v2_0_75(num_classes=1001,
+def mobilenet_v2_0_75(num_classes=1000,
                       dropout_prob=1e-3,
-                      is_training=True):
+                      is_training=True,
+                      classifier_activation='softmax'):
     """
     Build mobilenet_v2_0.75 model
     :param num_classes:
     :param dropout_prob:
     :param is_training:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
-    return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=0.75)
+    return _mobilenet_v2(num_classes, dropout_prob, is_training,
+                         scale=0.75, classifier_activation=classifier_activation)
 
 
-def mobilenet_v2_1(name, num_classes=1001,
+def mobilenet_v2_1(name, num_classes=1000,
                    dropout_prob=1e-3,
-                   is_training=True):
+                   is_training=True,
+                   classifier_activation='softmax'):
     """
     Build mobilenet_v2_1.0 model
     :param name: the model name
     :param num_classes:
     :param dropout_prob:
     :param is_training:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
-    return _mobilenet_v2(name, num_classes, dropout_prob, is_training, scale=1.0)
+    return _mobilenet_v2(name, num_classes, dropout_prob, is_training,
+                         scale=1.0, classifier_activation=classifier_activation)
 
 
-def mobilenet_v2_1_3(name, num_classes=1001,
+def mobilenet_v2_1_3(name, num_classes=1000,
                      dropout_prob=1e-3,
-                     is_training=True):
+                     is_training=True,
+                     classifier_activation='softmax'):
     """
     Build mobilenet_v2_1.3 model
     :param name: the model name
     :param num_classes:
     :param dropout_prob:
     :param is_training:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
-    return _mobilenet_v2(name, num_classes, dropout_prob, is_training, scale=1.3)
+    return _mobilenet_v2(name, num_classes, dropout_prob, is_training,
+                         scale=1.3, classifier_activation=classifier_activation)
 
 
-def mobilenet_v2_1_4(num_classes=1001,
+def mobilenet_v2_1_4(num_classes=1000,
                      dropout_prob=1e-3,
-                     is_training=True):
+                     is_training=True,
+                     classifier_activation='softmax'):
     """
     Build mobilenet_v2_1.4 model
     :param num_classes:
     :param dropout_prob:
     :param is_training:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
-    return _mobilenet_v2(num_classes, dropout_prob, is_training, scale=1.4)
+    return _mobilenet_v2(num_classes, dropout_prob, is_training,
+                         scale=1.4, classifier_activation=classifier_activation)
 
 
-def _mobilenet_v2(name, num_classes=1001,
+def _mobilenet_v2(name, num_classes=1000,
                   dropout_prob=1e-3,
                   is_training=True,
-                  scale=1.0):
+                  scale=1.0,
+                  classifier_activation='softmax'):
     """
     Build mobilenet_v2 model
     :param name: the model name
@@ -113,6 +133,7 @@ def _mobilenet_v2(name, num_classes=1001,
     :param dropout_prob:
     :param is_training:
     :param scale:
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return:
     """
     first_block_filters = _make_divisible(32 * scale, 8)
@@ -195,7 +216,10 @@ def _mobilenet_v2(name, num_classes=1001,
                                kernel_regularizer=_gen_l2_regularizer(),
                                name='conv_preds')(x)
     x = tf.keras.layers.Reshape((num_classes,), name='reshape_2')(x)
-    outputs = tf.keras.layers.Activation('softmax', name='act_softmax')(x)
+    if classifier_activation == 'softmax':
+        outputs = tf.keras.layers.Activation('softmax', name='act_softmax')(x)
+    else:
+        outputs = x
     model = tf.keras.Model(inputs, outputs, name=name)
     return model
 

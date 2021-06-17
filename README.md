@@ -8,7 +8,7 @@ sparsity pruning depends on special algorithms and hardware to achieve accelerat
 Adlik pruning focuses on channel pruning and filter pruning, which can really reduce the number of parameters and
 flops. In terms of quantization, Adlik focuses on 8-bit quantization that is easier to accelerate on specific hardware.
 After testing, it is found that running a small batch of datasets can obtain a quantitative model with little loss of
-accuracy, so Adlik focuses on this method. Knowledge distillation is another way to improve the performance of deep  
+accuracy, so Adlik focuses on this method. Knowledge distillation is another way to improve the performance of deep
 learning algorithm. It is possible to compress the knowledge in the big model into a smaller model.
 
 The proposed framework mainly consists of two categories of algorithm components, i.e. pruner and quantizer. The
@@ -23,7 +23,7 @@ three modules.
 After filter pruning, model can continue to be quantized, the following table shows the accuracy of the pruned and
 quantized Lenet-5 and ResNet-50 models.
 
-| model     | baseline | pruned               | pruned+quantization(TF-Lite) | pruned+quantization(TF-TRT) |
+| Model     | Baseline | Pruned               | Pruned + Quantization(TF-Lite) | Pruned + Quantization(TF-TRT) |
 | --------- | -------- | -------------------- | ---------------------------- | --------------------------- |
 | LeNet-5   | 98.85    | 99.11(59% pruned)    | 99.05                        | 99.11                       |
 | ResNet-50 | 76.174   | 75.456(31.9% pruned) | 75.158                       | 75.28                       |
@@ -31,7 +31,7 @@ quantized Lenet-5 and ResNet-50 models.
 The Pruner completely removes redundant parameters, which further leads to smaller model size and faster execution.
 The following table is the size of the above model files:
 
-| model     | baseline(H5) | pruned(H5)         | quantization(TF-Lite) | quantization(TF-TRT) |
+| Model     | Baseline(H5) | Pruned(H5)         | Quantization(TF-Lite) | Quantization(TF-TRT) |
 | --------- | ------------ | ------------------ | --------------------- | -------------------- |
 | LeNet-5   | 1176KB       | 499KB(59% pruned)  | 120KB                 | 1154KB (pb)          |
 | ResNet-50 | 99MB         | 67MB(31.9% pruned) | 18MB                  | 138MB(pb)            |
@@ -47,11 +47,23 @@ which was tested on ImageNet. The original test accuracy is 71.25%, and model si
 
 Knowledge distillation is an effective way to imporve the performance of model.
 
-The following table  shows the distillation result of  ResNet-50 as the student network where ResNet-101 as the teacher network.
+The following table shows the distillation result of ResNet-50 as the student network where ResNet-101 as the teacher network.
 
-| student model | ResNet-101 distilled | accuracy change |
+| Student Model | ResNet-101 Distilled | Accuracy Change |
 | ------------- | -------------------- | --------------- |
 | ResNet-50     | 77.14%               | +0.97%          |
+
+Ensemble distillation can significantly improve the accuracy of the model. In the case of cutting 72.8% of the
+parameters, using senet154 and resnet152b as the teacher network, ensemble distillation can increase the accuracy
+by more than 4%.
+The details are shown in the table below, and the code can refer to examples\resnet_50_imagenet_prune_distill.py.
+
+| Model     | Accuracy | Params              | FLOPs |  Model Size |
+| --------- | -------- | -------------------- | ---------------------------- | ---------------------------- |
+| ResNet-50 | 76.174   | 25610152 | 3899M|99M |
+| + pruned | 72.28   | 6954152 ( 72.8% pruned) | 1075M                     | 27M|
+| + pruned + distill | 76.39   | 6954152 ( 72.8% pruned) | 1075M                     | 27M|
+| + pruned + distill + quantization(TF-Lite)  | 75.938  | - | -                     | 7.1M|
 
 ## 1. Pruning and quantization principle
 
@@ -85,7 +97,7 @@ quantification of ResNet-50 in less than one minute.
 
 Knowledge distillation is a compression technique by which the knowledge of a larger model(teacher) is transfered into
 a smaller one(student). During distillation, a student model learns from a teacher model to generalize well by raise
-the temperature of the final softmax of the teacher model as the soft set of targets.  
+the temperature of the final softmax of the teacher model as the soft set of targets.
 
 ![Distillation](imgs/distillation.png)
 
@@ -252,7 +264,7 @@ This step is the same as described above. You can get detailed instructions from
 Batch size is an important hyper-parameter for Deep Learning model training. If you have more GPU memory available,
 you can try larger batch size! You have to adjust the learning rate according to different batch size.
 
-| model     | card      | batch size | learning-rate |
+| Model     | Card      | Batch Size | Learning Rate |
 | --------- | --------- | ---------- | ------------- |
 | ResNet-50 | V100 32GB | 256        | 0.1           |
 | ResNet-50 | P100 16GB | 128        | 0.05          |

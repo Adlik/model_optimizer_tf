@@ -9,18 +9,20 @@ https://arxiv.org/pdf/1512.03385.pdf  Deep Residual Learning for Image Recogniti
 
 """
 import tensorflow as tf
+from .config import ModelConfig
 
-
-L2_WEIGHT_DECAY = 1e-4
-BATCH_NORM_DECAY = 0.9
-BATCH_NORM_EPSILON = 1e-5
+_config = ModelConfig(l2_weight_decay=1e-4, batch_norm_decay=0.9, batch_norm_epsilon=1e-5)
+L2_WEIGHT_DECAY = _config.l2_weight_decay
+BATCH_NORM_DECAY = _config.batch_norm_decay
+BATCH_NORM_EPSILON = _config.batch_norm_epsilon
 
 
 def _gen_l2_regularizer(use_l2_regularizer=True):
     return tf.keras.regularizers.l2(L2_WEIGHT_DECAY) if use_l2_regularizer else None
 
 
-def resnet(layer_num, name, num_classes=1001, use_l2_regularizer=True, is_training=True):
+def resnet(layer_num, name, num_classes=1000, use_l2_regularizer=True,
+           is_training=True, classifier_activation='softmax'):
     """
     Build resnet-18 resnet-34 resnet-50 resnet-101 resnet-152 model
     :param layer_num: 18, 34, 50, 101, 152
@@ -28,6 +30,7 @@ def resnet(layer_num, name, num_classes=1001, use_l2_regularizer=True, is_traini
     :param num_classes: classification class
     :param use_l2_regularizer: if use l2_regularizer
     :param is_training: if training or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return: keras model
     """
     if layer_num == 18:
@@ -62,49 +65,56 @@ def resnet(layer_num, name, num_classes=1001, use_l2_regularizer=True, is_traini
     logits = tf.keras.layers.Dense(num_classes, kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.01),
                                    kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
                                    bias_regularizer=_gen_l2_regularizer(use_l2_regularizer), name='dense1')(x)
-    outputs = tf.keras.layers.Softmax()(logits)
-    model = tf.keras.Model(inputs, [outputs, logits], name=name)
+    if classifier_activation == 'softmax':
+        outputs = tf.keras.layers.Softmax()(logits)
+    else:
+        outputs = logits
+    model = tf.keras.Model(inputs, outputs, name=name)
     return model
 
 
-def resnet_18(is_training, name):
+def resnet_18(is_training, name, classifier_activation='softmax'):
     """
     Build resnet-18 model
     :param is_training: if training or not
     :param name: the model name
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return: resnet-18 model
     """
-    return resnet(18, is_training=is_training, name=name)
+    return resnet(18, is_training=is_training, name=name, classifier_activation=classifier_activation)
 
 
-def resnet_34(is_training, name):
+def resnet_34(is_training, name, classifier_activation='softmax'):
     """
     Build resnet-34 model
     :param is_training: if training or not
     :param name: the model name
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return: resnet-34 model
     """
-    return resnet(34, is_training=is_training, name=name)
+    return resnet(34, is_training=is_training, name=name, classifier_activation=classifier_activation)
 
 
-def resnet_50(is_training, name):
+def resnet_50(is_training, name, classifier_activation='softmax'):
     """
     Build resnet-50 model
     :param is_training: if training or not
     :param name: the model name
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return: resnet-50 model
     """
-    return resnet(50, is_training=is_training, name=name)
+    return resnet(50, is_training=is_training, name=name, classifier_activation=classifier_activation)
 
 
-def resnet_101(is_training, name):
+def resnet_101(is_training, name, classifier_activation='softmax'):
     """
     Build resnet-101 model
     :param is_training: if training or not
     :param name: the model name
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return: resnet-101 model
     """
-    return resnet(101, is_training=is_training, name=name)
+    return resnet(101, is_training=is_training, name=name, classifier_activation=classifier_activation)
 
 
 def residual_block(stage, block_num, input_data, filters, kernel_size, is_training):

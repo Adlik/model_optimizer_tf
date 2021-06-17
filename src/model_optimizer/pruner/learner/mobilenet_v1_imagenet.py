@@ -66,6 +66,7 @@ class Learner(LearnerBase):
         :param is_training: is training or not
         :return: Return model compile metrics
         """
-        if self.config.get_attribute('scheduler') == 'distill' and is_training:
+        if (self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill', False)) \
+                and is_training:
             return None
         return ['sparse_categorical_accuracy']

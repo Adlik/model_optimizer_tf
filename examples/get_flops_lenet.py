@@ -11,18 +11,18 @@ import os
 # sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
 # print(sys.path)
 
-from model_optimizer.stat import get_keras_model_flops  # noqa: E402
+from model_optimizer.stat import get_keras_model_params_flops  # noqa: E402
 
 
 def _main():
     base_dir = os.path.dirname(__file__)
     model_h5_path = './models_eval_ckpt/lenet_mnist/checkpoint-12.h5'
-    origin_flops = get_keras_model_flops(os.path.join(base_dir, model_h5_path))
+    origin_params, origin_flops = get_keras_model_params_flops(os.path.join(base_dir, model_h5_path))
     model_h5_path = './models_eval_ckpt/lenet_mnist_pruned/checkpoint-12.h5'
-    pruned_flops = get_keras_model_flops(os.path.join(base_dir, model_h5_path))
+    pruned_params, pruned_flops = get_keras_model_params_flops(os.path.join(base_dir, model_h5_path))
 
-    print('flops before prune: {}'.format(origin_flops))
-    print('flops after pruned: {}'.format(pruned_flops))
+    print('Before prune, FLOPs: {}, Params: {}'.format(origin_flops, origin_params))
+    print('After pruned, FLOPs: {}, Params: {}'.format(pruned_flops, pruned_params))
 
 
 if __name__ == "__main__":

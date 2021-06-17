@@ -1,0 +1,44 @@
+version: 1
+pruners:
+  prune_func1:
+    criterion: l1_norm
+    prune_type: auto_prune
+    ratio: 0.5
+
+lr_schedulers:
+  # Learning rate
+  - name: warmup_lr
+    class: LearningRateWarmupCallback
+    warmup_epochs: 5
+    verbose: 0
+  - name: lr_multiply_1
+    class: LearningRateScheduleCallback
+    start_epoch: 5
+    end_epoch: 120
+    multiplier: 1.0
+  - name: lr_multiply_0.1
+    class: LearningRateScheduleCallback
+    start_epoch: 120
+    end_epoch: 240
+    multiplier: 1e-1
+  - name: lr_multiply_0.01
+    class: LearningRateScheduleCallback
+    start_epoch: 240
+    end_epoch: 320
+    multiplier: 1e-2
+  - name: lr_multiply_0.001
+    class: LearningRateScheduleCallback
+    start_epoch: 320
+    multiplier: 1e-3
+
+prune_schedulers:
+  - pruner:
+      func_name: prune_func1
+    epochs: [0]
+
+distill:
+  alpha: 0.4
+  temperature: 1
+  student_name: "resnet_50"
+  teacher_path: "/models_zoo/senet154-0466-f1b79a9b_tf2.h5,/models_zoo/resnet152b-0431-b41ec90e.tf2.h5"
+  model_load_func: "load_tf_ensemble_model"

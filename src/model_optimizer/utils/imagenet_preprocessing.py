@@ -10,6 +10,29 @@ import tensorflow as tf
 _RESIZE_MIN = 256
 
 
+def image_normalization(img):
+    """
+    Normalization as in the ImageNet-1K validation procedure.
+    Parameters:
+    ----------
+    img : np.array
+        input image.
+    mean_rgb : tuple of 3 float
+        Mean of RGB channels in the dataset.
+    std_rgb : tuple of 3 float
+        STD of RGB channels in the dataset.
+    Returns:
+    -------
+    np.array
+        Output image.
+    """
+    mean_rgb = [123.675, 116.28, 103.53]
+    std_rgb = [58.395, 57.12, 57.375]
+    img = tf.subtract(img, tf.broadcast_to(mean_rgb, tf.shape(img)))
+    img = tf.divide(img, tf.broadcast_to(std_rgb, tf.shape(img)))
+    return img
+
+
 def preprocess_image(image_buffer, bbox, output_height, output_width,
                      num_channels=3, is_training=False):
     """
@@ -42,7 +65,7 @@ def preprocess_image(image_buffer, bbox, output_height, output_width,
             image_buffer, crop_window, channels=num_channels)
 
         cropped = tf.image.random_flip_left_right(cropped)
-        return tf.image.resize(cropped, [output_height, output_width], method=tf.image.ResizeMethod.BILINEAR)
+        img = tf.image.resize(cropped, [output_height, output_width], method=tf.image.ResizeMethod.BILINEAR)
     else:
         image = tf.image.decode_jpeg(image_buffer, channels=num_channels)
 
@@ -62,4 +85,5 @@ def preprocess_image(image_buffer, bbox, output_height, output_width,
         height, width = shape[0], shape[1]
         crop_top = (height - output_height) // 2
         crop_left = (width - output_width) // 2
-        return tf.slice(image, [crop_top, crop_left, 0], [output_height, output_width, -1])
+        img = tf.slice(image, [crop_top, crop_left, 0], [output_height, output_width, -1])
+    return image_normalization(img)

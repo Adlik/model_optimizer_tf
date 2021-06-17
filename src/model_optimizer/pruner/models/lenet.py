@@ -7,11 +7,12 @@ Lenet model
 import tensorflow as tf
 
 
-def lenet(name, is_training=True):
+def lenet(is_training=True, name='lenet', classifier_activation='softmax'):
     """
     This implements a slightly modified LeNet-5 [LeCun et al., 1998a]
+    :param is_training: if training or
     :param name: the model name
-    :param is_training: if training or not
+    :param classifier_activation: classifier_activation can only be None or "softmax"
     :return: LeNet model
     """
     input_ = tf.keras.layers.Input(shape=(28, 28, 1), name='input')
@@ -33,6 +34,9 @@ def lenet(name, is_training=True):
     x = tf.keras.layers.Flatten(name='flatten')(x)
     x = tf.keras.layers.Dense(120, activation='relu', name='dense_1')(x)
     x = tf.keras.layers.Dense(84, activation='relu', name='dense_2')(x)
-    output_ = tf.keras.layers.Dense(10, activation='softmax', name='dense_3')(x)
+    if classifier_activation == 'softmax':
+        output_ = tf.keras.layers.Dense(10, activation='softmax', name='dense_3')(x)
+    else:
+        output_ = tf.keras.layers.Dense(10, activation=None, name='dense_3')(x)
     model = tf.keras.Model(input_, output_, name=name)
     return model

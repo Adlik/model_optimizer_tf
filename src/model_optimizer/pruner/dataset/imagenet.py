@@ -54,7 +54,7 @@ class ImagenetDataset(DatasetBase):
 
         features = tf.io.parse_single_example(serialized=example_serialized,
                                               features=feature_description)
-        label = tf.cast(features['image/class/label'], dtype=tf.int32)
+        label = tf.cast(features['image/class/label'], dtype=tf.int32) - 1
 
         xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 0)
         ymin = tf.expand_dims(features['image/object/bbox/ymin'].values, 0)
