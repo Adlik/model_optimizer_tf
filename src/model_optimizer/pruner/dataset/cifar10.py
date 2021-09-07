@@ -31,6 +31,7 @@ class Cifar10Dataset(DatasetBase):
         self.buffer_size = 10000
         self.num_samples_of_train = 50000
         self.num_samples_of_val = 10000
+        self.data_shape = (32, 32, 3)
 
     # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     def parse_fn(self, example_serialized):

@@ -27,6 +27,7 @@ _REQUIRED_PACKAGES = [
 
 _TEST_REQUIRES = [
     'bandit',
+    'pylint==2.10.2',
     'pytest-cov',
     'pytest-flake8',
     'pytest-mypy',
