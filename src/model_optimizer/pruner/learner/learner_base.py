@@ -41,8 +41,10 @@ class LearnerBase(metaclass=abc.ABCMeta):
         if gpus:
             tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'GPU')
         self.verbose = 1 if hvd.rank() == 0 else 0
-        origin_train_model = get_model(config, is_training=True)
-        origin_eval_model = get_model(config, is_training=False)
+        input_shape = get_dataset(self.config, is_training=True, num_shards=hvd.size(), shard_index=hvd.rank())\
+            .data_shape
+        origin_train_model = get_model(config, input_shape, is_training=True)
+        origin_eval_model = get_model(config, input_shape, is_training=False)
         self.models_train.append(origin_train_model)
         self.models_eval.append(origin_eval_model)
         train_model = tf.keras.models.clone_model(origin_train_model)

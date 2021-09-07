@@ -9,7 +9,7 @@ from ..distill.distiller import get_distiller
 
 
 # pylint: disable=too-many-return-statements
-def get_model(config, is_training=True):
+def get_model(config, input_shape, is_training=True):
     """
     Get model
     :param config: Config object
@@ -19,8 +19,9 @@ def get_model(config, is_training=True):
     model_name = config.get_attribute('model_name')
     scheduler_config = get_scheduler(config)
     if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50', 'resnet_101',
-                          'mobilenet_v1', 'mobilenet_v2']:
+                          'mobilenet_v1', 'mobilenet_v2', 'cnn1d','cnn1d_tiny']:
         raise Exception('Not support model %s' % model_name)
+
     if (config.get_attribute('scheduler') == 'distill' or config.get_attribute('is_distill')) and is_training:
         classifier_activation = None
     else:
@@ -48,8 +49,14 @@ def get_model(config, is_training=True):
         from .mobilenet_v2 import mobilenet_v2_1
         student_model = mobilenet_v2_1(is_training=is_training, name=model_name,
                                        classifier_activation=classifier_activation)
+    elif model_name == 'cnn1d':
+        from .cnn1d import cnn1d
+        student_model = cnn1d(is_training=is_training, name=model_name, classifier_activation=classifier_activation)
+    elif model_name == 'cnn1d_tiny':
+        from .cnn1d import cnn1d_tiny
+        student_model = cnn1d_tiny(is_training=is_training, name=model_name, classifier_activation=classifier_activation)
     if (config.get_attribute('scheduler') == 'distill' or config.get_attribute('is_distill')) and is_training:
-        distill_model = get_distiller(student_model, scheduler_config)
+        distill_model = get_distiller(student_model, scheduler_config, input_shape)
     else:
         distill_model = student_model
     return distill_model

@@ -65,6 +65,10 @@ The details are shown in the table below, and the code can refer to examples\res
 | + pruned + distill | 76.39   | 6954152 ( 72.8% pruned) | 1075M                     | 27M|
 | + pruned + distill + quantization(TF-Lite)  | 75.938  | - | -                     | 7.1M|
 
+We also impletement a 1D-CNN distillation which shows distillation is also effective on Encrypted Traffic Classification.
+You can get detailed instructions from [here](doc/CNN-1D-tiny-Distillation.md). Following this instruction, you can build
+your own dataset and model to train and distill under adlik model optimizer.
+
 ## 1. Pruning and quantization principle
 
 ### 1.1 Filter pruning

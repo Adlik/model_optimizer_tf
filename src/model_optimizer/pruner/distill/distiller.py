@@ -9,11 +9,12 @@ import tensorflow as tf
 from .distill_loss import DistillLossLayer
 
 
-def get_distiller(student_model, scheduler_config, teacher_model_load_func=None):
+def get_distiller(student_model, scheduler_config, input_shape, teacher_model_load_func=None):
     """
     Get distiller model
     :param student_model: student model function
     :param scheduler_config: scheduler config object
+    :param input_shape: the input shape of the data
     :param teacher_model_load_func: func to load teacher model
     :return: keras model of distiller
     """
@@ -22,7 +23,7 @@ def get_distiller(student_model, scheduler_config, teacher_model_load_func=None)
         if "model_load_func" in scheduler_config['distill']:
             teacher_model_load_func = scheduler_config['distill']["model_load_func"]
 
-    input_img = tf.keras.layers.Input(shape=(224, 224, 3), name='image')
+    input_img = tf.keras.layers.Input(shape=input_shape, name='image')
     input_lbl = tf.keras.layers.Input((), name="label", dtype='int32')
     student = student_model
     logits = student(input_img)

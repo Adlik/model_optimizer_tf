@@ -78,9 +78,9 @@ class DatasetBase:
             dataset = dataset.map(self.parse_fn_distill, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         else:
             dataset = dataset.map(self.parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        return self.__build_batch(dataset)
+        return self.build_batch(dataset)
 
-    def __build_batch(self, dataset):
+    def build_batch(self, dataset):
         """
         Make an batch from tf.data.Dataset.
         :param dataset: tf.data.Dataset object
