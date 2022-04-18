@@ -25,7 +25,7 @@ def get_network(model):
     for i, layer in enumerate(model.layers):
         digraph.add_node(i, name=layer.name, type=str(type(layer)))
     for i, layer in enumerate(model.layers):
-        for j in range(0, len(model.layers)):
+        for j, _ in enumerate(model.layers):
             _inputs = model.layers[j].input
             if isinstance(_inputs, list):
                 for _input in _inputs:

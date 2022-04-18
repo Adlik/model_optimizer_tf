@@ -36,6 +36,7 @@ def create_config_from_obj(obj) -> object:
     :return:
     """
     schema_path = os.path.join(os.path.dirname(__file__), 'config_schema.json')
+    # pylint: disable=unspecified-encoding
     with open(schema_path) as schema_file:
         body_schema = json.load(schema_file)
 

@@ -128,7 +128,7 @@ def residual_block(stage, block_num, input_data, filters, kernel_size, is_traini
     :param is_training: if training or not
     :return:
     """
-    if stage != 0 and block_num == 0:
+    if stage != 1 and block_num == 1:
         strides = 2
     else:
         strides = 1
@@ -141,7 +141,7 @@ def residual_block(stage, block_num, input_data, filters, kernel_size, is_traini
                                name='res'+str(stage)+'_conv2d_'+str(block_num)+'_2')(x)
     x = tf.keras.layers.BatchNormalization(momentum=BATCH_NORM_DECAY, epsilon=BATCH_NORM_EPSILON,
                                            name='res'+str(stage)+'_bn_'+str(block_num)+'_2')(x, training=is_training)
-    if stage != 0 and block_num == 0:
+    if stage != 1 and block_num == 1:
         input_data = tf.keras.layers.Conv2D(filters, kernel_size=1, strides=strides, padding='same', use_bias=False,
                                             name='res'+str(stage)+'_conv2d_'+str(block_num)+'_3')(input_data)
     x = tf.keras.layers.Add(name='res'+str(stage)+'_add_'+str(block_num)+'_1')([x, input_data])

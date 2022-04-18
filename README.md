@@ -18,6 +18,22 @@ The models module is responsible for the network definition of each model. The d
 the data loading and preprocessing. The learner is responsible for model training and fine-tuning, including the
 definition of each hyper-parameter. The quantizer includes calibration dataset, TF-Lite and TF-TRT quantization
 three modules.
+
+We retrained all classification models on ImageNet-1k dataset, and the pretrained models are available download in [adlik/model_zoo](https://github.com/Adlik/model_zoo)
+
+| Model         | strategy           | accuracy |
+| ------------- | ------------------ | -------- |
+| resnet18      | normal training    | 66.834%  |
+| resnet50      | normal training    | 76.0%    |
+| resnet50-distill | distillation    | 77.14%   |
+| resnet50-slim| pruning + distillation| 76.376% |
+| resnet50-prune25 | pruning + distillation | 78.79% |
+| resnet50-prune37.5 | pruning + distillation | 78.07% |
+| resnet101     | normal training    | 77.12%   |
+| resnet34      | normal training    | 70.346%  |
+| mobilenet v1  | normal training    | 70.63%   |
+| mobilenet v2  | normal training    | 72.396%  |
+
 ![System Structure](imgs/sys_arch.png)
 
 After filter pruning, model can continue to be quantized, the following table shows the accuracy of the pruned and
@@ -26,7 +42,7 @@ quantized Lenet-5 and ResNet-50 models.
 | Model     | Baseline | Pruned               | Pruned + Quantization(TF-Lite) | Pruned + Quantization(TF-TRT) |
 | --------- | -------- | -------------------- | ---------------------------- | --------------------------- |
 | LeNet-5   | 98.85    | 99.11(59% pruned)    | 99.05                        | 99.11                       |
-| ResNet-50 | 76.174   | 75.456(31.9% pruned) | 75.158                       | 75.28                       |
+| ResNet-50 | 76.0   | 75.456(31.9% pruned) | 75.158                       | 75.28                       |
 
 The Pruner completely removes redundant parameters, which further leads to smaller model size and faster execution.
 The following table is the size of the above model files:
@@ -60,10 +76,14 @@ The details are shown in the table below, and the code can refer to examples\res
 
 | Model     | Accuracy | Params              | FLOPs |  Model Size |
 | --------- | -------- | -------------------- | ---------------------------- | ---------------------------- |
-| ResNet-50 | 76.174   | 25610152 | 3899M|99M |
+| ResNet-50 | 76.0   | 25610152 | 3899M|99M |
 | + pruned | 72.28   | 6954152 ( 72.8% pruned) | 1075M                     | 27M|
-| + pruned + distill | 76.39   | 6954152 ( 72.8% pruned) | 1075M                     | 27M|
+| + pruned + distill | 76.376   | 6954152 ( 72.8% pruned) | 1075M                     | 27M|
 | + pruned + distill + quantization(TF-Lite)  | 75.938  | - | -                     | 7.1M|
+
+The pruned model is obtained by setting pruning ratio of 0.5.
+Besides, we test distillation models with pruning ratios of 0.25 and 0.375,
+and get higher model accuracy of 78.79% and 78.07%, respectively.
 
 ## 1. Pruning and quantization principle
 

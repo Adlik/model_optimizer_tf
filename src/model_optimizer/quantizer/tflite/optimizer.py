@@ -37,13 +37,15 @@ class Quantizer(BaseQuantizer):
         converter.inference_input_type = tf.uint8
         converter.inference_output_type = tf.uint8
         tflite_quant_model = converter.convert()
-        open(os.path.join(self.target_dir, self.model_name+".tflite"), "wb").write(tflite_quant_model)
+        with open(os.path.join(self.target_dir, self.model_name+".tflite"), "wb") as quan_file:
+            quan_file.write(tflite_quant_model)
 
     @staticmethod
     def _write_version_file(saved_model_path):
         version_path = os.path.dirname(saved_model_path)
         if isinstance(version_path, bytes):
             version_path = version_path.decode('utf-8')
+        # pylint: disable=unspecified-encoding
         with open(os.path.join(str(version_path), "TFVERSION"), 'w') as version_file:
             version_file.write(tf.__version__)
         _LOGGER.info('Write TFVERSION file success, path: %s', version_path)

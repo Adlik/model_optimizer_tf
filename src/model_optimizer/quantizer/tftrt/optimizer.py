@@ -49,6 +49,7 @@ class Quantizer(BaseQuantizer):
         version_path = os.path.dirname(saved_model_path)
         if isinstance(version_path, bytes):
             version_path = version_path.decode('utf-8')
+        # pylint: disable=unspecified-encoding
         with open(os.path.join(str(version_path), "TFVERSION"), 'w') as version_file:
             version_file.write(tf.__version__)
         _LOGGER.info('Write TFVERSION file success, path: %s', version_path)

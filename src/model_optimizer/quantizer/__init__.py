@@ -15,7 +15,7 @@ def create_quantizer(config, calibrate_input_func):
     """
     model_type = config.get_attribute('model_type')
     if model_type not in ['tflite', 'tftrt']:
-        raise Exception('Not support model type %s' % model_type)
+        raise Exception(f'Not support model type {model_type}')
     if model_type == 'tflite':
         from .tflite.optimizer import Quantizer
         return Quantizer(config, calibrate_input_func)
@@ -23,4 +23,4 @@ def create_quantizer(config, calibrate_input_func):
         from .tftrt.optimizer import Quantizer
         return Quantizer(config, calibrate_input_func)
     else:
-        raise Exception('Not support platform {}'.format(model_type))
+        raise Exception(f'Not support platform {model_type}')
