@@ -32,7 +32,7 @@ class DatasetBase:
         for item in self._COMMON_PARAMS:
             if config.get_attribute(item) is None and item in self._COMMON_REQUIRED:
                 _LOGGER.error('Require "%s" but not found', item)
-                raise Exception('Require "%s" but not found' % item)
+                raise Exception(f'Require "{item}" but not found')
             self.__setattr__(item, config.get_attribute(item))
 
         _LOGGER.info('data_dir is: %s', self.data_dir)

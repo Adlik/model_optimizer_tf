@@ -67,8 +67,8 @@ def keras_model_predict(request, file_path, is_multi_output=False):
         print(f'\rcur_steps: {cur_steps}/{num_samples}, acc: {acc}', end='', flush=True)
     print('\r')
     print('=' * 50)
-    print('inference comsume time: {} s'.format(time.time() - start))
-    print('acc1: {}'.format(100.0 * score / num_samples))
+    print(f'inference comsume time: {time.time() - start} s')
+    print(f'acc1: {100.0 * score / num_samples}')
 
 
 def tflite_model_predict(request, file_path, mpi_size=1, mpi_rank=0, comm=None):
@@ -81,7 +81,8 @@ def tflite_model_predict(request, file_path, mpi_size=1, mpi_rank=0, comm=None):
     :param comm: mpi4py.MPI.COMM_WORLD object
     :return:
     """
-    ds_val = get_dataset(prune_conf_from_obj(request), is_training=False, num_shards=mpi_size, shard_index=mpi_rank)
+    ds_val = get_dataset(prune_conf_from_obj(request), is_training=False,
+                         num_shards=mpi_size, shard_index=mpi_rank)
     total_num_samples = ds_val.num_samples
     num_samples = total_num_samples // mpi_size
     val_dataset = ds_val.build()
@@ -109,8 +110,8 @@ def tflite_model_predict(request, file_path, mpi_size=1, mpi_rank=0, comm=None):
     if mpi_rank == 0:
         print('\r')
         print('=' * 50)
-        print('inference comsume time: {} s'.format(time.time() - start))
-        print('acc1: {}'.format(100.0 * score / total_num_samples))
+        print(f'inference comsume time: {time.time() - start} s')
+        print(f'acc1: {100.0 * score / total_num_samples}')
 
 
 def tftrt_model_predict(request, file_path):
@@ -139,5 +140,5 @@ def tftrt_model_predict(request, file_path):
         print(f'\rcur_steps: {cur_steps}/{num_samples}, acc: {acc}', end='', flush=True)
     print('\r')
     print('=' * 50)
-    print('inference comsume time: {} s'.format(time.time() - start))
-    print('acc1: {}'.format(100.0 * score / num_samples))
+    print(f'inference comsume time: {time.time() - start} s')
+    print(f'acc1: {100.0 * score / num_samples}')

@@ -47,7 +47,7 @@ def get_epochs_lr_to_train(scheduler_config):
         span_epoch = end_epoch - start_epoch
         epochs_span.append(span_epoch)
         start_epoch = end_epoch
-    print('epochs_span: {}'.format(epochs_span))
+    print(f'epochs_span: {epochs_span}')
     lr_schedulers = None
     if 'lr_schedulers' in scheduler_config:
         lr_schedulers = scheduler_config['lr_schedulers']

@@ -12,7 +12,9 @@ disable = fixme,
           unnecessary-pass,
           import-outside-toplevel,
           no-else-continue,
-          similarities
+          similarities,
+          import-error
+
 
 [FORMAT]
 max-line-length = 120

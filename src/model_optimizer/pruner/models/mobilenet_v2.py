@@ -230,7 +230,7 @@ def _inverted_res_block(inputs, filters, scale, stride, expansion, block_id, is_
     pointwise_conv_filters = int(filters * scale)
     pointwise_filters = _make_divisible(pointwise_conv_filters, 8)
     x = inputs
-    prefix = 'block_{}_'.format(block_id)
+    prefix = f'block_{block_id}_'
 
     if block_id:
         # Expand
