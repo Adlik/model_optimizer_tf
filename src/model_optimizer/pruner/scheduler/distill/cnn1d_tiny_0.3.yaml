@@ -1,0 +1,6 @@
+version: 1
+distill:
+  alpha: 0.3
+  temperature: 5
+  student_name: "cnn1d_tiny"
+  teacher_path: "/root/work/adlik_public_traffic/model_optimizer/examples/models_eval_ckpt/cnn1d/checkpoint-60-logits.h5"

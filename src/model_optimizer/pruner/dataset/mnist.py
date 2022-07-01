@@ -31,6 +31,7 @@ class MnistDataset(DatasetBase):
         self.buffer_size = 10000
         self.num_samples_of_train = 60000
         self.num_samples_of_val = 10000
+        self.data_shape = (28, 28, 1)
 
     # pylint: disable=R0201
     # pylint: disable=no-value-for-parameter,unexpected-keyword-arg

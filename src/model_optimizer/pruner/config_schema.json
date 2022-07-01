@@ -6,7 +6,8 @@
       "enum": [
         "mnist",
         "cifar10",
-        "imagenet"
+        "imagenet",
+        "iscx_session_all"
       ],
       "description": "dataset name"
     },

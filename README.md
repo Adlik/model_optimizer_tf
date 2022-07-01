@@ -85,6 +85,10 @@ The pruned model is obtained by setting pruning ratio of 0.5.
 Besides, we test distillation models with pruning ratios of 0.25 and 0.375,
 and get higher model accuracy of 78.79% and 78.07%, respectively.
 
+We also impletement a 1D-CNN distillation which shows distillation is also effective on Encrypted Traffic Classification.
+You can get detailed instructions from [here](doc/CNN-1D-tiny-Distillation.md). Following this instruction, you can build
+your own dataset and model to train and distill under adlik model optimizer.
+
 ## 1. Pruning and quantization principle
 
 ### 1.1 Filter pruning

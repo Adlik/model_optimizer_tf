@@ -29,7 +29,7 @@ def test_get_model_distill():
     }
 
     config = prune_conf_from_obj(request)
-    train_model = get_model(config, is_training=True)
+    train_model = get_model(config, (244, 244, 3), is_training=True)
     for layer in train_model.layers:
         if layer.name == "DistillLoss":
             assert False
