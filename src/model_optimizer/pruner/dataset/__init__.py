@@ -17,7 +17,7 @@ def get_dataset(config, is_training, num_shards=1, shard_index=0):
     """
     dataset_name = config.get_attribute('dataset')
     if dataset_name not in ['mnist', 'cifar10', 'imagenet']:
-        raise Exception('Not support dataset %s' % dataset_name)
+        raise Exception(f'Not support dataset {dataset_name}')
     if dataset_name == 'mnist':
         from .mnist import MnistDataset
         return MnistDataset(config, is_training)
@@ -28,4 +28,4 @@ def get_dataset(config, is_training, num_shards=1, shard_index=0):
         from .imagenet import ImagenetDataset
         return ImagenetDataset(config, is_training, num_shards, shard_index)
     else:
-        raise Exception('Not support dataset {}'.format(dataset_name))
+        raise Exception(f'Not support dataset {dataset_name}')

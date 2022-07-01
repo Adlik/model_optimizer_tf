@@ -34,7 +34,7 @@ class BaseQuantizer:
         for item in self._COMMON_PARAMS:
             if config.get_attribute(item) is None and item in self._COMMON_REQUIRED:
                 _LOGGER.error('Require "%s" but not found', item)
-                raise Exception('Require "%s" but not found' % item)
+                raise Exception(f'Require "{item}" but not found')
             self.__setattr__(item, config.get_attribute(item))
         self.model_dir = self._make_model_dir()
         self.version, self.version_dir = self._get_version_dir()
@@ -93,7 +93,7 @@ class BaseQuantizer:
         version_dir = os.path.join(self.model_dir, version)
         _LOGGER.info("Export model version : %s, dir: %s", version, version_dir)
         if os.path.exists(version_dir):
-            raise Exception('Output version is already exist: {}'.format(version_dir))
+            raise Exception(f'Output version is already exist: {version_dir}')
         return version, version_dir
 
     def _get_model_default_version(self):

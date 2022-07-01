@@ -8,7 +8,7 @@ from ..scheduler.common import get_scheduler
 from ..distill.distiller import get_distiller
 
 
-# pylint: disable=too-many-return-statements
+# pylint: disable=too-many-return-statements,too-many-branches
 def get_model(config, is_training=True):
     """
     Get model
@@ -18,9 +18,9 @@ def get_model(config, is_training=True):
     """
     model_name = config.get_attribute('model_name')
     scheduler_config = get_scheduler(config)
-    if model_name not in ['lenet', 'resnet_18', 'vgg_m_16', 'resnet_50', 'resnet_101',
+    if model_name not in ['lenet', 'resnet_18', 'resnet_34', 'vgg_m_16', 'resnet_50', 'resnet_101',
                           'mobilenet_v1', 'mobilenet_v2']:
-        raise Exception('Not support model %s' % model_name)
+        raise Exception(f'Not support model {model_name}')
     if (config.get_attribute('scheduler') == 'distill' or config.get_attribute('is_distill')) and is_training:
         classifier_activation = None
     else:
@@ -34,6 +34,9 @@ def get_model(config, is_training=True):
     elif model_name == 'resnet_18':
         from .resnet import resnet_18
         student_model = resnet_18(is_training, model_name, classifier_activation=classifier_activation)
+    elif model_name == 'resnet_34':
+        from .resnet import resnet_34
+        student_model = resnet_34(is_training, model_name, classifier_activation=classifier_activation)
     elif model_name == 'resnet_50':
         from .resnet import resnet_50
         student_model = resnet_50(is_training, model_name, classifier_activation=classifier_activation)

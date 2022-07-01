@@ -14,7 +14,7 @@ def input_fn(dataset_name, data_path):
     :return: func of input
     """
     if dataset_name not in ['mnist', 'cifar10', 'imagenet']:
-        raise Exception('Not support dataset %s' % dataset_name)
+        raise Exception(f'Not support dataset {dataset_name}')
     if dataset_name == 'mnist':
         from .mnist import MnistDataset
         return MnistDataset(data_path).input_gen
@@ -25,4 +25,4 @@ def input_fn(dataset_name, data_path):
         from .imagenet import ImagenetDataset
         return ImagenetDataset(data_path).input_gen
     else:
-        raise Exception('Not support dataset {}'.format(dataset_name))
+        raise Exception(f'Not support dataset {dataset_name}')

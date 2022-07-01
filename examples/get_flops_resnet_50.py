@@ -22,8 +22,8 @@ def _main():
     model_h5_path = './models_eval_ckpt/resnet_50_imagenet_pruned/checkpoint-120.h5'
     pruned_params, pruned_flops = get_keras_model_params_flops(os.path.join(base_dir, model_h5_path))
 
-    print('Before prune, FLOPs: {}, Params: {}'.format(origin_flops, origin_params))
-    print('After pruned, FLOPs: {}, Params: {}'.format(pruned_flops, pruned_params))
+    print(f'Before prune, FLOPs: {origin_flops}, Params: {origin_params}')
+    print(f'After pruned, FLOPs: {pruned_flops}, Params: {pruned_params}')
 
 
 if __name__ == "__main__":
