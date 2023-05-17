@@ -1,10 +1,10 @@
 """
-Tests for the model_optimizer package.
+Tests for the model_optimizer tf package.
 """
 import tensorflow as tf
 import numpy as np
-from model_optimizer.pruner.core import AutoPruner
-from model_optimizer.pruner.core import SpecifiedLayersPruner
+from model_optimizer_tf.pruner.core import AutoPruner
+from model_optimizer_tf.pruner.core import SpecifiedLayersPruner
 
 
 # noqa: ignore=C901

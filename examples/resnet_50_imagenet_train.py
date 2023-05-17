@@ -12,7 +12,7 @@ import os
 # print(sys.path)
 
 
-from model_optimizer import prune_model  # noqa: E402
+from model_optimizer_tf import prune_model  # noqa: E402
 
 
 def _main():

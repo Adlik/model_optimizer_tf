@@ -18,8 +18,8 @@ from tensorflow.python.framework import convert_to_constants  # pylint: disable=
 # sys.path.insert(0, join(abspath(dirname(__file__)), '../../src'))
 # print(sys.path)
 
-from model_optimizer.pruner.dataset import get_dataset  # noqa: E402
-from model_optimizer.pruner.config import create_config_from_obj as prune_conf_from_obj  # noqa: E402
+from model_optimizer_tf.pruner.dataset import get_dataset  # noqa: E402
+from model_optimizer_tf.pruner.config import create_config_from_obj as prune_conf_from_obj  # noqa: E402
 
 
 def _get_graph_func(saved_model_dir):

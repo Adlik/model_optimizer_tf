@@ -1,16 +1,16 @@
 # About the benchmark
 
-The benchmark is used to test  the adlik serving performance of different models which are optimized by model_optimizer.
+The benchmark is used to test the adlik serving performance of different models which are optimized by model_optimizer tf.
 
 ## Test the runtime performance
 
 Take ResNet-50 as an example to illustrate how to test the model performance
 
-1. clone model_optimizer  and change the working directory into the source directory
+1. clone model_optimizer tf and change the working directory into the source directory
 
    ```sh
-   git clone https://github.com/Adlik/model_optimizer.git
-   cd model_optimizer
+   git clone https://github.com/Adlik/model_optimizer_tf.git
+   cd model_optimizer_tf
    ```
 
 2. make a model directory and put resnet50.h5 in it
