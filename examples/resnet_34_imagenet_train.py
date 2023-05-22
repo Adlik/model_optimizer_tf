@@ -11,7 +11,7 @@ import os
 # sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
 # print(sys.path)
 
-from model_optimizer import prune_model  # noqa: E402
+from model_optimizer_tf import prune_model  # noqa: E402
 
 
 def _main():

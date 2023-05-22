@@ -1,4 +1,4 @@
-status = [ "Adlik.model_optimizer" ]
+status = [ "Adlik.model_optimizer_tf" ]
 timeout_sec = 21600
 delete_merged_branches = true
 use_squash_merge = true

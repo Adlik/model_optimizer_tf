@@ -1,4 +1,4 @@
-# Copyright 2019 ZTE corporation. All Rights Reserved.
+# Copyright 2023 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 """
@@ -52,7 +52,7 @@ def send_response(url, message):
 
     while retries <= max_retries:
         try:
-            result = requests.put(url, json=message)
+            result = requests.put(url, json=message, timeout=10)
             _LOGGER.info('Send response to url: %s, message: %s, response: code: %s, content: %s', url, message,
                          result.status_code, result.content)
             return result

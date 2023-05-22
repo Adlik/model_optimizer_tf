@@ -1,4 +1,4 @@
-# Copyright 2019 ZTE corporation. All Rights Reserved.
+# Copyright 2023 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 """
@@ -147,7 +147,7 @@ class LearnerBase(metaclass=abc.ABCMeta):
         train_model = self.models_train[-1]
         if lr_schedulers is not None:
             self.callbacks.clear()
-            self.callbacks.extend(get_call_backs(lr_schedulers))
+            self.callbacks.extend(get_call_backs(lr_schedulers, self.learning_rate*hvd.size()))
             if hvd.rank() == 0:
                 self.callbacks.append(tf.keras.callbacks.ModelCheckpoint(os.path.join(self.checkpoint_path,
                                                                                       './checkpoint-{epoch}.h5'),

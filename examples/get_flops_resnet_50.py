@@ -12,7 +12,7 @@ import os
 # sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
 # print(sys.path)
 
-from model_optimizer.stat import get_keras_model_params_flops  # noqa: E402
+from model_optimizer_tf.stat import get_keras_model_params_flops  # noqa: E402
 
 
 def _main():

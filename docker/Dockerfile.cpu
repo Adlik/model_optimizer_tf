@@ -1,17 +1,20 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
+
+ARG PYTHON_VERSION=3.8
+ARG TENSORFLOW_VERSION=2.5.0
 
 RUN apt-get update && \
         apt-get install -y software-properties-common && \
         apt-get update -y && \
         apt-get install -y --no-install-recommends --allow-downgrades --allow-change-held-packages \
-        build-essential python3.6 python3.6-dev python3-distutils \
+        build-essential python${PYTHON_VERSION} python${PYTHON_VERSION}-dev python${PYTHON_VERSION}-distutils \
         curl git openssh-client openssh-server && \
         mkdir -p /var/run/sshd && \
         mkdir -p /root/work && \
-        curl -fSsL https://bootstrap.pypa.io/get-pip.py | python3.6 && \
-        python3.6 -m pip install pip --upgrade && \
-        python3.6 -m pip install wheel && \
-        ln -s /usr/bin/python3.6 /usr/bin/python && \
+        curl -fSsL https://bootstrap.pypa.io/get-pip.py | python${PYTHON_VERSION} && \
+        python${PYTHON_VERSION} -m pip install pip --upgrade && \
+        python${PYTHON_VERSION} -m pip install wheel && \
+        ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
         rm -rf /var/lib/apt/lists/*
 
 # Install Open MPI
@@ -27,9 +30,9 @@ RUN mkdir /tmp/openmpi && \
     rm -rf /tmp/openmpi
 
 # Install Tensorflow and Horovod
-RUN pip install --no-cache-dir tensorflow==2.3.0
+RUN pip install --no-cache-dir tensorflow==${TENSORFLOW_VERSION}
 
-RUN HOROVOD_WITH_TENSORFLOW=1 pip install --no-cache-dir horovod==0.19.1
+RUN HOROVOD_WITH_TENSORFLOW=1 pip install --no-cache-dir horovod==0.24.0
 
 # Allow OpenSSH Password-free Login
 RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking | grep -v Port > /etc/ssh/ssh_config.new && \
@@ -44,15 +47,15 @@ RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking | grep -v Port > /et
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
 # Install Model Optimimzer
-RUN mkdir /tmp/model_optimizer && \
-    cd /tmp/model_optimizer && \
-    git clone https://github.com/Adlik/model_optimizer.git && \
-    cd model_optimizer && \
-    python3.6 setup.py install && \
+RUN mkdir /tmp/model_optimizer_tf && \
+    cd /tmp/model_optimizer_tf && \
+    git clone https://github.com/Adlik/model_optimizer_tf.git && \
+    cd model_optimizer_tf && \
+    python${PYTHON_VERSION} -m pip install . && \
     mkdir -p /root/work && \
     cp -rf examples /root/work/. && \
     cp -rf tools /root/work/. && \
-    rm -rf /tmp/model_optimizer
+    rm -rf /tmp/model_optimizer_tf
 
 
 WORKDIR "/root/work/examples"

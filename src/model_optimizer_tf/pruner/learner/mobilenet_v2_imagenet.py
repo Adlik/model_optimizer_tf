@@ -1,13 +1,14 @@
-# Copyright 2019 ZTE corporation. All Rights Reserved.
+# Copyright 2023 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Resnet-50 on imagenet Learner definition
+MobileNet-V2 on imagenet Learner definition
 """
 import os
 import tensorflow as tf
 import horovod.tensorflow.keras as hvd
 from .learner_base import LearnerBase
+from .utils import cosine_multiplier
 
 
 class Learner(LearnerBase):
@@ -29,12 +30,13 @@ class Learner(LearnerBase):
             # Horovod: using `lr = 1.0 * hvd.size()` from the very beginning leads to worse final
             # accuracy. Scale the learning rate `lr = 1.0` ---> `lr = 1.0 * hvd.size()` during
             # the first five epochs. See https://arxiv.org/abs/1706.02677 for details.
-            hvd.callbacks.LearningRateWarmupCallback(warmup_epochs=5, verbose=0),
-            # Horovod: after the warmup reduce learning rate by 10 on the 30th, 60th and 80th epochs.
-            hvd.callbacks.LearningRateScheduleCallback(start_epoch=5, end_epoch=30, multiplier=1.),
-            hvd.callbacks.LearningRateScheduleCallback(start_epoch=30, end_epoch=60, multiplier=1e-1),
-            hvd.callbacks.LearningRateScheduleCallback(start_epoch=60, end_epoch=80, multiplier=1e-2),
-            hvd.callbacks.LearningRateScheduleCallback(start_epoch=80, multiplier=1e-3),
+            hvd.callbacks.LearningRateWarmupCallback(self.learning_rate*hvd.size(), warmup_epochs=5, verbose=0),
+            # Horovod: after the warmup reduce learning rate by cosine_multiplier.
+            hvd.callbacks.LearningRateScheduleCallback(self.learning_rate*hvd.size(), start_epoch=5, end_epoch=30,
+                                                       multiplier=1.),
+            hvd.callbacks.LearningRateScheduleCallback(
+                self.learning_rate*hvd.size(),
+                start_epoch=30, multiplier=lambda epoch: cosine_multiplier(epoch, total_epoch=self.epochs))
         ]
         # Horovod: save checkpoints only on worker 0 to prevent other workers from corrupting them.
         if hvd.rank() == 0:
@@ -57,12 +59,7 @@ class Learner(LearnerBase):
         :param is_training: is training or not
         :return: Return model compile losses
         """
-        softmax_loss = tf.keras.losses.SparseCategoricalCrossentropy()
-        if (self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill'))\
-                and is_training:
-            return None
-        else:
-            return softmax_loss
+        return 'sparse_categorical_crossentropy'
 
     def get_metrics(self, is_training=True):
         """
@@ -70,7 +67,7 @@ class Learner(LearnerBase):
         :param is_training: is training or not
         :return: Return model compile metrics
         """
-        if (self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill')) \
+        if (self.config.get_attribute('scheduler') == 'distill' or self.config.get_attribute('is_distill', False)) \
                 and is_training:
             return None
         return ['sparse_categorical_accuracy']

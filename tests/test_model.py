@@ -1,10 +1,10 @@
 """
-Tests for the model_optimizer.models.get_model method.
+Tests for the model_optimizer_tf.models.get_model method.
 """
 import os
 # If you did not execute the setup.py, uncomment the following four lines
-from model_optimizer.pruner.config import create_config_from_obj as prune_conf_from_obj
-from model_optimizer.pruner.models import get_model
+from model_optimizer_tf.pruner.config import create_config_from_obj as prune_conf_from_obj
+from model_optimizer_tf.pruner.models import get_model
 
 
 def test_get_model_distill():

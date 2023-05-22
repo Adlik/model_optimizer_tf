@@ -8,7 +8,7 @@ cd $base_path
 git clone https://github.com/Adlik/Adlik.git
 base_path=$(cd `dirname $0`; pwd)
 echo "base_path: "$base_path
-optimizer_benchmark_path=$base_path/model_optimizer/benchmark
+optimizer_benchmark_path=$base_path/model_optimizer_tf/benchmark
 adlik_benchmark_path=$base_path/Adlik/benchmark
 adlik_path=$base_path/Adlik 
 cp -r $optimizer_benchmark_path/tests $adlik_benchmark_path

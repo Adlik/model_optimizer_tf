@@ -8,13 +8,13 @@ jobs:
     strategy:
         matrix:
             Linux:
-                vmImage: ubuntu-18.04
+                vmImage: ubuntu-20.04
     pool:
         vmImage: $(vmImage)
     steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.6'
+          versionSpec: '3.8'
       - script: sudo apt-get install -y --no-install-recommends openmpi-bin libopenmpi-dev
         displayName: Install openmpi
       - script: pip install -U tox
@@ -25,7 +25,7 @@ jobs:
   - job: Markdownlint
     displayName: Markdownlint
     pool:
-        vmImage: ubuntu-18.04
+        vmImage: ubuntu-20.04
     steps:
       - script: sudo npm install -g markdownlint-cli
         displayName: Install markdownlint-cli
