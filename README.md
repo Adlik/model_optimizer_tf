@@ -1,9 +1,14 @@
-# Model Optimizer
+# Model Optimizer Tf
 
-[![Build Status](https://dev.azure.com/Adlik/GitHub/_apis/build/status/Adlik.model_optimizer?branchName=master)](https://dev.azure.com/Adlik/GitHub/_build/latest?definitionId=2&branchName=master)
+[![Build Status](https://dev.azure.com/Adlik/GitHub/_apis/build/status/Adlik.model_optimizer_tf?branchName=master)](https://dev.azure.com/Adlik/GitHub/_build/latest?definitionId=6&branchName=master)
 [![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/23640)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Adlik model optimizer, focusing on and running on specific hardware to achieve the purpose of acceleration. Because
+**Update**: we released the [model optimizer](https://github.com/Adlik/model_optimizer.git) implemented by pytorch.
+It supports automatic pruning and quantization. The quantized model supports exporting to JIT/ONNX,
+and supports inferring on TVM/TensorRT.
+
+Adlik model_optimizer_tf, focusing on and running on specific hardware to achieve the purpose of acceleration. Because
 sparsity pruning depends on special algorithms and hardware to achieve acceleration, the usage scenarios are limited.
 Adlik pruning focuses on channel pruning and filter pruning, which can really reduce the number of parameters and
 flops. In terms of quantization, Adlik focuses on 8-bit quantization that is easier to accelerate on specific hardware.
@@ -127,19 +132,15 @@ Refer to the paper [Distilling the Knowledge in a Neural Network](https://arxiv.
 
 These instructions will help get Adlik optimizer up and running on your local machine.
 
-1. [Clone Adlik model optimizer](#Clone-Adlik-model-optimizer)
-2. [Install the package](#Install-the-package)
+1. Clone Adlik model_optimizer_tf
+2. Install the package
 
-Notes:
+### 2.1 Clone Adlik model_optimizer_tf
 
-- Adlik model optimizer has only been tested on Ubuntu 18.04 LTS with Python 3.6.
-
-### 2.1 Clone Adlik model optimizer
-
-Clone the Adlik model optimizer code repository from github:
+Clone the Adlik model_optimizer_tf code repository from github:
 
 ```shell
-git clone https://github.com/Adlik/model_optimizer.git
+git clone https://github.com/Adlik/model_optimizer_tf.git
 ```
 
 ### 2.2 Install the package
@@ -162,8 +163,8 @@ rm -rf /tmp/openmpi
 #### 2.2.2 Install python package
 
 ```shell
-pip install tensorflow-gpu==2.3.0
-pip install horovod==0.19.1
+pip install tensorflow-gpu==2.5.0
+pip install horovod==0.24.0
 pip install mpi4py
 pip install networkx
 pip install jsonschema
@@ -171,7 +172,7 @@ pip install jsonschema
 
 ## 3. Usage
 
-The following uses LeNet-5 on the MNIST dataset to illustrate how to use Adlik model optimizer to achieve model
+The following uses LeNet-5 on the MNIST dataset to illustrate how to use Adlik model optimizer tf to achieve model
 training, pruning, and quantization.
 
 ### 3.1 Prepare data

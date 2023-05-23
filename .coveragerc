@@ -2,7 +2,7 @@
 branch = true
 parallel = true
 
-source = model_optimizer
+source = model_optimizer_tf
          tests
 
 [paths]

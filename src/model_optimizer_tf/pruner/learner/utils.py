@@ -1,4 +1,4 @@
-# Copyright 2019 ZTE corporation. All Rights Reserved.
+# Copyright 2023 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 """
@@ -8,7 +8,7 @@ import math
 import horovod.tensorflow.keras as hvd
 
 
-def get_call_backs(lr_schedulers):
+def get_call_backs(lr_schedulers, initial_lr):
     """
     Build learner callbacks from schedulers
     :param lr_schedulers: schedulers dict
@@ -27,13 +27,15 @@ def get_call_backs(lr_schedulers):
     ]
     for lr_func in lr_schedulers:
         if lr_func['class'] == 'LearningRateWarmupCallback':
-            callbacks.append(hvd.callbacks.LearningRateWarmupCallback(warmup_epochs=lr_func['warmup_epochs'],
+            callbacks.append(hvd.callbacks.LearningRateWarmupCallback(initial_lr,
+                                                                      warmup_epochs=lr_func['warmup_epochs'],
                                                                       verbose=lr_func['verbose']))
         elif lr_func['class'] == 'LearningRateScheduleCallback':
             end_epoch = None
             if 'end_epoch' in lr_func:
                 end_epoch = lr_func['end_epoch']
-            callbacks.append(hvd.callbacks.LearningRateScheduleCallback(start_epoch=lr_func['start_epoch'],
+            callbacks.append(hvd.callbacks.LearningRateScheduleCallback(initial_lr,
+                                                                        start_epoch=lr_func['start_epoch'],
                                                                         end_epoch=end_epoch,
                                                                         multiplier=float(lr_func['multiplier'])))
     return callbacks

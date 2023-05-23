@@ -12,8 +12,8 @@ import os
 # sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
 # print(sys.path)
 
-from model_optimizer import quantize_model  # noqa: E402
-from model_optimizer.quantizer.calib_dataset import input_fn  # noqa: E402
+from model_optimizer_tf import quantize_model  # noqa: E402
+from model_optimizer_tf.quantizer.calib_dataset import input_fn  # noqa: E402
 
 
 def _main():

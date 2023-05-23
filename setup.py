@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-# Copyright 2019 ZTE corporation. All Rights Reserved.
+# Copyright 2023 ZTE corporation. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Model optimizer.
+Model optimizer tf.
 """
 
 from setuptools import find_packages, setup
@@ -12,12 +12,14 @@ from pkg_resources import DistributionNotFound, get_distribution
 _VERSION = '0.0.0'
 
 _REQUIRED_PACKAGES = [
+    'isort==4.3.21',
+    'flake8==3.9.2',
     'requests==2.25.0',
-    'tensorflow==2.3.0',
+    'tensorflow==2.5.0',
     'jsonschema==3.1.1',
     'networkx==2.4',
-    'mpi4py==3.0.3',
-    'horovod==0.19.1',
+    'mpi4py==3.1.3',
+    'horovod==0.24.0',
     'tf2cv==0.0.16',
     'PyYAML==5.3.1',
     'types-PyYAML',
@@ -26,9 +28,10 @@ _REQUIRED_PACKAGES = [
 ]
 
 _TEST_REQUIRES = [
+    'py==1.11.0',
     'bandit',
     'pytest-cov',
-    'pytest-flake8',
+    'pytest-flake8==1.0.7',
     'pytest-mypy',
     'pytest-pylint',
     'pytest-xdist'
@@ -48,10 +51,10 @@ def get_dist(pkgname):
 
 
 if get_dist('tensorflow') is None and get_dist('tensorflow-gpu') is not None:
-    _REQUIRED_PACKAGES.remove('tensorflow==2.3.0')
+    _REQUIRED_PACKAGES.remove('tensorflow==2.5.0')
 
 setup(
-    name="model_optimizer",
+    name="model_optimizer_tf",
     version=_VERSION.replace('-', ''),
     author='ZTE',
     author_email='ai@zte.com.cn',
@@ -63,10 +66,10 @@ setup(
     install_requires=_REQUIRED_PACKAGES,
     extras_require={'test': _TEST_REQUIRES},
     package_data={
-        'model_optimizer': ['**/*.json',
-                            'pruner/scheduler/uniform_auto/*.yaml',
-                            'pruner/scheduler/uniform_specified_layer/*.yaml',
-                            'pruner/scheduler/distill/*.yaml']
+        'model_optimizer_tf': ['**/*.json',
+                               'pruner/scheduler/uniform_auto/*.yaml',
+                               'pruner/scheduler/uniform_specified_layer/*.yaml',
+                               'pruner/scheduler/distill/*.yaml']
     },
 
 )
